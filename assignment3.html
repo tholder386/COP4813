@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 3 - User Information Form</title>
+    <style>
+        /* Dark Purple Theme Variables */
+        :root {
+            --bg-dark: #120b18;
+            --card-bg: #1e132b;
+            --purple-accent: #8a2be2;
+            --purple-hover: #9d4edd;
+            --purple-light: #d8b4fe;
+            --text-light: #f3e8ff;
+            --text-muted: #b7a0d0;
+            --error-red: #ff4d6d;
+            --border-color: #3c2a54;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 600px;
+            padding: 35px;
+        }
+
+        h2 {
+            color: var(--purple-light);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.9em;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--purple-light);
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #150d20;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-light);
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--purple-accent);
+            box-shadow: 0 0 8px rgba(138, 43, 226, 0.4);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .error-message {
+            color: var(--error-red);
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--purple-accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.05em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--purple-hover);
+        }
+
+        /* Modal / Confirmation Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--purple-accent);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .modal-content h3 {
+            color: var(--purple-light);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .summary-item {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .summary-item strong {
+            color: var(--purple-light);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--purple-accent);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(138, 43, 226, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Contact & Details Form</h2>
+        <p class="subtitle">Please fill out all required fields below.</p>
+
+        <form id="userForm" novalidate>
+            <!-- Single Text Box for Name -->
+            <div class="form-group">
+                <label for="fullName">Full Name (First & Last)</label>
+                <input type="text" id="fullName" placeholder="e.g. Jane Doe">
+                <div class="error-message" id="nameError">Please enter both a first and last name.</div>
+            </div>
+
+            <!-- Single Text Box for Address -->
+            <div class="form-group">
+                <label for="fullAddress">Mailing Address (Street, City, State ZIP)</label>
+                <input type="text" id="fullAddress" placeholder="123 Main St, City, ST 12345">
+                <div class="error-message" id="addressError">Please provide a complete address (Street, City, 2-letter State, 5-digit Zip).</div>
+            </div>
+
+            <!-- Masked Phone Input -->
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" placeholder="(555) 555-5555" maxlength="14">
+                <div class="error-message" id="phoneError">Please enter a valid 10-digit phone number.</div>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="name@domain.com">
+                <div class="error-message" id="emailError">Please enter a valid email address.</div>
+            </div>
+
+            <!-- Birth Date -->
+            <div class="form-group">
+                <label for="birthdate">Birth Date</label>
+                <input type="date" id="birthdate">
+                <div class="error-message" id="dateError">Please enter a valid birth date in the past.</div>
+            </div>
+
+            <!-- Multi-line Message -->
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" placeholder="Type your message here..."></textarea>
+                <div class="error-message" id="messageError">Message cannot be blank.</div>
+            </div>
+
+            <!-- Human Security Confirmation -->
+            <div class="form-group">
+                <label for="captcha">Security Check: What is 5 + 3?</label>
+                <input type="text" id="captcha" placeholder="Your answer">
+                <div class="error-message" id="captchaError">Incorrect answer. Please answer 5 + 3.</div>
+            </div>
+
+            <button type="submit" class="btn">Submit Information</button>
+        </form>
+    </div>
+
+    <!-- Confirmation Modal Overlay -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <h3>Confirm Your Details</h3>
+            <div id="summaryContent"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="editBtn">Edit Details</button>
+                <button type="button" class="btn" id="confirmBtn">Confirm & Send Email</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Phone Mask implementation: (000) 000-0000
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', (e) => {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+        });
+
+        // Form Validation Logic
+        const form = document.getElementById('userForm');
+        const modal = document.getElementById('confirmModal');
+        const summaryContent = document.getElementById('summaryContent');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            let isValid = true;
+
+            // 1. Validate Full Name (At least 2 words)
+            const fullName = document.getElementById('fullName').value.trim();
+            const nameParts = fullName.split(/\s+/);
+            if (nameParts.length < 2 || nameParts[0] === '' || nameParts[1] === '') {
+                showError('nameError');
+                isValid = false;
+            } else {
+                hideError('nameError');
+            }
+
+            // 2. Validate Single Address (Checks for street, city, 2-letter state, 5-digit zip)
+            const address = document.getElementById('fullAddress').value.trim();
+            const addressPattern = /^.+\s*,\s*.+\s*,\s*[A-Za-z]{2}\s+\d{5}(-\d{4})?$/;
+            if (!addressPattern.test(address) && address.length < 10) {
+                showError('addressError');
+                isValid = false;
+            } else {
+                hideError('addressError');
+            }
+
+            // 3. Validate Phone Number (10 digits minimum)
+            const phoneDigits = phoneInput.value.replace(/\D/g, '');
+            if (phoneDigits.length !== 10) {
+                showError('phoneError');
+                isValid = false;
+            } else {
+                hideError('phoneError');
+            }
+
+            // 4. Validate Email
+            const email = document.getElementById('email').value.trim();
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                showError('emailError');
+                isValid = false;
+            } else {
+                hideError('emailError');
+            }
+
+            // 5. Validate Birth Date (Must exist and not be in the future)
+            const birthdateVal = document.getElementById('birthdate').value;
+            const selectedDate = new Date(birthdateVal);
+            const today = new Date();
+            if (!birthdateVal || selectedDate >= today) {
+                showError('dateError');
+                isValid = false;
+            } else {
+                hideError('dateError');
+            }
+
+            // 6. Validate Message
+            const message = document.getElementById('message').value.trim();
+            if (message === "") {
+                showError('messageError');
+                isValid = false;
+            } else {
+                hideError('messageError');
+            }
+
+            // 7. Security Captcha Check
+            const captcha = document.getElementById('captcha').value.trim();
+            if (captcha !== "8") {
+                showError('captchaError');
+                isValid = false;
+            } else {
+                hideError('captchaError');
+            }
+
+            // If valid, build and open Confirmation Modal
+            if (isValid) {
+                summaryContent.innerHTML = `
+                    <div class="summary-item"><strong>Name:</strong> ${escapeHtml(fullName)}</div>
+                    <div class="summary-item"><strong>Address:</strong> ${escapeHtml(address)}</div>
+                    <div class="summary-item"><strong>Phone:</strong> ${escapeHtml(phoneInput.value)}</div>
+                    <div class="summary-item"><strong>Email:</strong> ${escapeHtml(email)}</div>
+                    <div class="summary-item"><strong>Birth Date:</strong> ${escapeHtml(birthdateVal)}</div>
+                    <div class="summary-item"><strong>Message:</strong> ${escapeHtml(message)}</div>
+                `;
+                modal.style.display = 'flex';
+            }
+        });
+
+        // Edit Button Action
+        document.getElementById('editBtn').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Confirm & Mailto Trigger Action
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            const recipientEmail = "tholder386@gmail.com"; // <-- REPLACE WITH YOUR EMAIL ADDRESS
+            const fullName = document.getElementById('fullName').value;
+            const address = document.getElementById('fullAddress').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const birthdate = document.getElementById('birthdate').value;
+            const message = document.getElementById('message').value;
+
+            const subject = encodeURIComponent("Assignment 3 Submission - " + fullName);
+            const body = encodeURIComponent(
+                `Name: ${fullName}\n` +
+                `Address: ${address}\n` +
+                `Phone: ${phone}\n` +
+                `Email: ${email}\n` +
+                `Birth Date: ${birthdate}\n\n` +
+                `Message:\n${message}`
+            );
+
+            // Opens default email client with mailto action
+            window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+            modal.style.display = 'none';
+        });
+
+        function showError(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function hideError(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+    </script>
+</body>
+</html>
