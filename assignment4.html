@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JSFiddle 1gxh6tf9</title>
+
+  <style>
+    
+  </style>
+
+  
+</head>
+<body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Damped Harmonic Oscillator Calculator & Plotter</title>
+  
+  <!-- Include Chart.js Plotting Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f7f6;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    p.equation {
+      background: #eef2f5;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: bold;
+    }
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .input-group label {
+      font-size: 0.9em;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .input-group input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .output-section {
+      margin-top: 25px;
+    }
+    .chart-container {
+      position: relative;
+      margin-top: 20px;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Damped Harmonic Oscillator Calculator</h2>
+  <p>Calculates and plots displacement over time for an underdamped mechanical/electrical system:</p>
+  <p class="equation">y(t) = A * e^(-γ * t) * cos(ω * t)</p>
+
+  <!-- Input Controls -->
+  <div class="input-grid">
+    <div class="input-group">
+      <label for="amplitude">Initial Amplitude (A):</label>
+      <input type="number" id="amplitude" value="10" step="any">
+    </div>
+
+    <div class="input-group">
+      <label for="damping">Damping Factor (γ):</label>
+      <input type="number" id="damping" value="0.2" step="any">
+    </div>
+
+    <div class="input-group">
+      <label for="frequency">Angular Frequency (ω):</label>
+      <input type="number" id="frequency" value="3.14" step="any">
+    </div>
+
+    <div class="input-group">
+      <label for="tMin">Time Start (X Min):</label>
+      <input type="number" id="tMin" value="0" step="any">
+    </div>
+
+    <div class="input-group">
+      <label for="tMax">Time End (X Max):</label>
+      <input type="number" id="tMax" value="20" step="any">
+    </div>
+
+    <div class="input-group">
+      <label for="stepCount">Data Points (Resolution):</label>
+      <input type="number" id="stepCount" value="200" step="1">
+    </div>
+  </div>
+
+  <button onclick="calculateAndPlot()">Calculate & Plot</button>
+
+  <!-- Output / Plot -->
+  <div class="output-section">
+    <h3>Plot Output</h3>
+    <div class="chart-container">
+      <canvas id="oscillatorChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  let chartInstance = null; // Global reference to clear old plots on recalculation
+
+  function calculateAndPlot() {
+    // 1. Get input values (with default fallbacks)
+    const A = parseFloat(document.getElementById('amplitude').value);
+    const gamma = parseFloat(document.getElementById('damping').value);
+    const omega = parseFloat(document.getElementById('frequency').value);
+    const tMin = parseFloat(document.getElementById('tMin').value);
+    const tMax = parseFloat(document.getElementById('tMax').value);
+    const steps = parseInt(document.getElementById('stepCount').value);
+
+    // Validation
+    if (tMin >= tMax || steps <= 0) {
+      alert("Please enter a valid time range and positive step count.");
+      return;
+    }
+
+    // 2. Generate x (time) and y (displacement) data
+    const xValues = [];
+    const yValues = [];
+    const stepSize = (tMax - tMin) / steps;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = tMin + i * stepSize;
+      // Equation: y(t) = A * e^(-γ * t) * cos(ω * t)
+      const y = A * Math.exp(-gamma * t) * Math.cos(omega * t);
+
+      xValues.push(t.toFixed(2));
+      yValues.push(y);
+    }
+
+    // 3. Render or update Chart.js Plot
+    const ctx = document.getElementById('oscillatorChart').getContext('2d');
+
+    // Destroy existing chart instance to prevent duplicate layering
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: xValues,
+        datasets: [{
+          label: 'Displacement y(t)',
+          data: yValues,
+          borderColor: '#3498db',
+          backgroundColor: 'rgba(52, 152, 219, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          pointRadius: 0 // Smooth curve without point dots
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Time (t) [Independent Variable]'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Displacement (y) [Dependent Variable]'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Initial plot on page load
+  window.onload = calculateAndPlot;
+</script>
+
+</body>
+</html>
+
+  <script>
+    
+  </script>
+</body>
+</html>
