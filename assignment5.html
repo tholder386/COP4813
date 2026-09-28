@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Mathematical Spirograph Studio</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.8);
+    }
+    /* Glassmorphism utility */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    /* Glow Effect */
+    .neon-border {
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-x-hidden bg-slate-950 text-slate-100">
+
+  <!-- Top Navigation Header -->
+  <header class="glass-panel sticky top-0 z-50 border-b border-slate-800/80 px-4 py-3 sm:px-6 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <i class="fa-solid font-bold fa-compact-disc text-white text-lg animate-spin" style="animation-duration: 12s;"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg leading-tight tracking-wide bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent">
+          Spirograph Studio
+        </h1>
+        <p class="text-xs text-slate-400">Parametric Curve & Geometry Simulator</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+        <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mr-1.5 animate-pulse"></span>
+        Canvas 2D Engine
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 max-w-7xl w-full mx-auto">
+    
+    <!-- LEFT / CONTROLS PANEL (5 Columns on Large Screens) -->
+    <section class="lg:col-span-5 xl:col-span-4 flex flex-col space-y-4">
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-5 shadow-xl">
+        
+        <!-- Preset Selector & Quick Controls -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-indigo-400"></i> Presets & Configuration
+            </h2>
+            <button id="btnRandomize" title="Randomize Parameters" class="px-2.5 py-1 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-dice text-purple-400"></i> Randomize
+            </button>
+          </div>
+
+          <div>
+            <label for="presetSelect" class="block text-xs font-medium text-slate-300 mb-1">Preset Shapes</label>
+            <select id="presetSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition">
+              <option value="custom">Custom Parameters</option>
+              <option value="classicStar" selected>Classic 5-Point Star (R=120, r=48, O=50)</option>
+              <option value="floralPetals">Floral Blossom (R=150, r=90, O=70)</option>
+              <option value="cosmicWeb">Cosmic Web (R=180, r=105, O=80)</option>
+              <option value="delicateLace">Delicate Lace (R=200, r=130, O=95)</option>
+              <option value="wildLoop">Wild Vortex (R=140, r=32, O=90)</option>
+              <option value="epitrochoidRing">Outer Ring Epitrochoid (Outside R)</option>
+            </select>
+          </div>
+
+          <!-- Type Selector (Hypotrochoid vs Epitrochoid) -->
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-800">
+            <button id="typeHypo" class="py-1.5 px-3 rounded-lg text-xs font-medium transition bg-indigo-600 text-white shadow-md">
+              Inside (Hypotrochoid)
+            </button>
+            <button id="typeEpi" class="py-1.5 px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition">
+              Outside (Epitrochoid)
+            </button>
+          </div>
+
+          <!-- Numerical Inputs for R, r, O -->
+          <div class="space-y-3.5 bg-slate-900/50 p-3.5 rounded-xl border border-slate-800/80">
+            
+            <!-- Parameter R -->
+            <div>
+              <div class="flex justify-between items-center text-xs mb-1">
+                <label for="inputR" class="font-medium text-slate-200 flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+                  Fixed Radius (R)
+                </label>
+                <span class="text-slate-400 font-mono text-[11px]" id="rangeValR">120 px</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <input type="range" id="sliderR" min="20" max="250" value="120" step="1" class="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                <input type="number" id="inputR" min="10" max="300" value="120" class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-center text-slate-100 focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+
+            <!-- Parameter r -->
+            <div>
+              <div class="flex justify-between items-center text-xs mb-1">
+                <label for="inputr" class="font-medium text-slate-200 flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>
+                  Rolling Radius (r)
+                </label>
+                <span class="text-slate-400 font-mono text-[11px]" id="rangeValr">48 px</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <input type="range" id="sliderr" min="5" max="200" value="48" step="1" class="w-full accent-purple-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                <input type="number" id="inputr" min="1" max="300" value="48" class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-center text-slate-100 focus:outline-none focus:border-indigo-500">
+              </div>
+              <p id="valErrorr" class="text-[10px] text-rose-400 mt-1 hidden">Constraint Warning: r should ideally be &le; R for Hypotrochoids.</p>
+            </div>
+
+            <!-- Parameter O -->
+            <div>
+              <div class="flex justify-between items-center text-xs mb-1">
+                <label for="inputO" class="font-medium text-slate-200 flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block"></span>
+                  Pen Offset (O)
+                </label>
+                <span class="text-slate-400 font-mono text-[11px]" id="rangeValO">50 px</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <input type="range" id="sliderO" min="0" max="200" value="50" step="1" class="w-full accent-pink-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                <input type="number" id="inputO" min="0" max="300" value="50" class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono text-center text-slate-100 focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Color Mode & Speed Controls -->
+          <div class="space-y-3">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <i class="fa-solid fa-palette text-pink-400"></i> Appearance & FX
+            </h3>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="colorMode" class="block text-xs font-medium text-slate-300 mb-1">Color Palette</label>
+                <select id="colorMode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                  <option value="rainbow">Rainbow Spectrum</option>
+                  <option value="randomSegment">Random Line Segments</option>
+                  <option value="neonGlow">Cyber Neon Glow</option>
+                  <option value="single">Single Solid Color</option>
+                  <option value="fire">Solar Flare (Warm)</option>
+                </select>
+              </div>
+
+              <div id="singleColorContainer" class="hidden">
+                <label for="singleColorPicker" class="block text-xs font-medium text-slate-300 mb-1">Select Color</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="singleColorPicker" value="#38bdf8" class="w-full h-8 bg-slate-900 border border-slate-700 rounded-lg cursor-pointer">
+                </div>
+              </div>
+              
+              <div id="glowControl">
+                <label for="lineWidth" class="block text-xs font-medium text-slate-300 mb-1">Line Width (<span id="widthVal">1.5</span>px)</label>
+                <input type="range" id="lineWidth" min="0.5" max="6" value="1.5" step="0.5" class="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+              </div>
+            </div>
+
+            <!-- Speed & Step Size -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <div>
+                <label for="speedSlider" class="block text-xs font-medium text-slate-300 mb-1">Speed Multiplier</label>
+                <input type="range" id="speedSlider" min="1" max="50" value="15" class="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+              </div>
+              <div>
+                <label for="stepSlider" class="block text-xs font-medium text-slate-300 mb-1">Step Resolution (t)</label>
+                <input type="range" id="stepSlider" min="0.01" max="0.1" value="0.03" step="0.005" class="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+              </div>
+            </div>
+
+            <!-- Drunk Spirograph Mode Toggle -->
+            <div class="flex items-center justify-between bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-beer-mug-empty text-amber-400 text-sm"></i>
+                <div>
+                  <span class="text-xs font-medium text-slate-200 block">Drunk Spirograph</span>
+                  <span class="text-[10px] text-slate-400 block">Random perturbations (+/-1 per step)</span>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="drunkModeToggle" class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Action Buttons Grid -->
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <div class="grid grid-cols-2 gap-2">
+            <button id="btnStart" class="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-lg shadow-indigo-500/25 transition active:scale-95 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-play"></i> <span id="lblStart">Start Drawing</span>
+            </button>
+            <button id="btnPause" disabled class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 font-medium rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-pause"></i> Pause
+            </button>
+          </div>
+          <button id="btnClear" class="w-full py-2 px-4 bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-900/50 font-medium rounded-xl text-xs transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-trash-can"></i> Clear Canvas
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT / CANVAS DISPLAY PANEL (7 Columns) -->
+    <section class="lg:col-span-7 xl:col-span-8 flex flex-col space-y-4">
+      
+      <!-- Canvas Container -->
+      <div class="glass-panel rounded-2xl p-3 sm:p-4 flex-1 flex flex-col justify-between relative overflow-hidden shadow-2xl min-h-[420px] lg:min-h-[550px]">
+        
+        <!-- Canvas Overlay Badges & HUD -->
+        <div class="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none z-10">
+          <!-- Mathematical Metrics HUD -->
+          <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5 backdrop-blur-md text-xs space-y-1 font-mono text-slate-300 shadow-lg">
+            <div class="flex items-center space-x-2">
+              <span class="text-slate-500">Symmetry Points:</span>
+              <span id="hudSymmetry" class="text-indigo-400 font-bold">5</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-slate-500">Full Revolutions:</span>
+              <span id="hudRevolutions" class="text-purple-400 font-bold">2</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-slate-500">Progress (t):</span>
+              <span id="hudProgress" class="text-emerald-400 font-bold">0.00 / 12.57</span>
+            </div>
+          </div>
+
+          <!-- Mathematical Equation Box -->
+          <div class="hidden sm:block bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5 backdrop-blur-md text-[11px] text-slate-400 max-w-[220px]">
+            <div class="font-semibold text-slate-200 mb-1 border-b border-slate-800 pb-1">Parametric Formula</div>
+            <div class="font-mono text-[10px] leading-relaxed">
+              x = (R±r)cos(t) - (r+O)cos((R±r)/r·t)<br>
+              y = (R±r)sin(t) - (r+O)sin((R±r)/r·t)
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Frame -->
+        <div class="w-full flex-1 flex items-center justify-center relative rounded-xl bg-slate-950/90 border border-slate-800 overflow-hidden min-h-[380px]">
+          <!-- Grid Background Effect -->
+          <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:2rem_2rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30"></div>
+          
+          <canvas id="spiroCanvas" class="w-full h-full relative z-0 cursor-crosshair"></canvas>
+        </div>
+
+        <!-- Canvas Bottom Status Bar -->
+        <div class="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2 px-1">
+          <div class="flex items-center space-x-2">
+            <span id="statusIndicator" class="inline-block w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+            <span id="statusText" class="font-medium">Ready to draw</span>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <button id="btnDownload" class="hover:text-indigo-400 transition flex items-center gap-1 text-slate-300">
+              <i class="fa-solid fa-download text-xs"></i> Export Image
+            </button>
+            <span class="text-slate-700">|</span>
+            <span>Origin: Center (0,0)</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-3 text-xs text-slate-500 border-t border-slate-900">
+    <p>Client-Side Scripting Interactivity • HTML5 Canvas Spirograph Parametric Renderer</p>
+  </footer>
+
+  <script>
+    // DOM Elements
+    const canvas = document.getElementById('spiroCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Controls & Inputs
+    const sliderR = document.getElementById('sliderR');
+    const inputR = document.getElementById('inputR');
+    const rangeValR = document.getElementById('rangeValR');
+
+    const sliderr = document.getElementById('sliderr');
+    const inputr = document.getElementById('inputr');
+    const rangeValr = document.getElementById('rangeValr');
+    const valErrorr = document.getElementById('valErrorr');
+
+    const sliderO = document.getElementById('sliderO');
+    const inputO = document.getElementById('inputO');
+    const rangeValO = document.getElementById('rangeValO');
+
+    const presetSelect = document.getElementById('presetSelect');
+    const typeHypo = document.getElementById('typeHypo');
+    const typeEpi = document.getElementById('typeEpi');
+
+    const colorMode = document.getElementById('colorMode');
+    const singleColorContainer = document.getElementById('singleColorContainer');
+    const singleColorPicker = document.getElementById('singleColorPicker');
+    const lineWidth = document.getElementById('lineWidth');
+    const widthVal = document.getElementById('widthVal');
+
+    const speedSlider = document.getElementById('speedSlider');
+    const stepSlider = document.getElementById('stepSlider');
+    const drunkModeToggle = document.getElementById('drunkModeToggle');
+
+    const btnStart = document.getElementById('btnStart');
+    const lblStart = document.getElementById('lblStart');
+    const btnPause = document.getElementById('btnPause');
+    const btnClear = document.getElementById('btnClear');
+    const btnRandomize = document.getElementById('btnRandomize');
+    const btnDownload = document.getElementById('btnDownload');
+
+    // HUD Elements
+    const hudSymmetry = document.getElementById('hudSymmetry');
+    const hudRevolutions = document.getElementById('hudRevolutions');
+    const hudProgress = document.getElementById('hudProgress');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+
+    // Engine State Variables
+    let isHypotrochoid = true; // true = Inside (Hypo), false = Outside (Epi)
+    let R = 120;
+    let r = 48;
+    let O = 50;
+    let t = 0;
+    let maxT = 0;
+    let isDrawing = false;
+    let isPaused = false;
+    let animationFrameId = null;
+    let prevX = null;
+    let prevY = null;
+
+    // Presets definitions
+    const presets = {
+      classicStar: { R: 120, r: 48, O: 50, hypo: true },
+      floralPetals: { R: 150, r: 90, O: 70, hypo: true },
+      cosmicWeb: { R: 180, r: 105, O: 80, hypo: true },
+      delicateLace: { R: 200, r: 130, O: 95, hypo: true },
+      wildVortex: { R: 140, r: 32, O: 90, hypo: true },
+      epitrochoidRing: { R: 100, r: 60, O: 50, hypo: false }
+    };
+
+    // Calculate Greatest Common Divisor (GCD) for symmetry calculation
+    function gcd(a, b) {
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+      while (b) {
+        let temp = b;
+        b = a % b;
+        a = temp;
+      }
+      return a;
+    }
+
+    // Calculate Least Common Multiple (LCM)
+    function lcm(a, b) {
+      if (a === 0 || b === 0) return 0;
+      return Math.abs((a * b) / gcd(a, b));
+    }
+
+    // Compute loop completion bounds based on mathematical periodicity
+    function calculateCurveBounds() {
+      const g = gcd(R, r);
+      const k = r / g;
+      const revs = Math.round(r / g);
+      // Symmetry lobes = R / g
+      const lobes = Math.round(R / g);
+      
+      // Total parameter length needed to close curve = 2 * PI * revs
+      maxT = 2 * Math.PI * revs;
+
+      hudSymmetry.textContent = lobes || 'N/A';
+      hudRevolutions.textContent = revs || 'N/A';
+      updateProgressHUD();
+    }
+
+    // Spirograph Parametric Equations:
+    // Hypotrochoid: x = (R - r)cos(t) + (r + O)cos(((R - r)/r)t)
+    // Epitrochoid:  x = (R + r)cos(t) - (r + O)cos(((R + r)/r)t)
+    function getPosition(tVal, currentR, currentr, currentO, isHypo) {
+      let x, y;
+      if (isHypo) {
+        const diff = currentR - currentr;
+        const ratio = diff / currentr;
+        x = diff * Math.cos(tVal) + (currentr + currentO) * Math.cos(ratio * tVal);
+        y = diff * Math.sin(tVal) - (currentr + currentO) * Math.sin(ratio * tVal);
+      } else {
+        const sum = currentR + currentr;
+        const ratio = sum / currentr;
+        x = sum * Math.cos(tVal) - (currentr + currentO) * Math.cos(ratio * tVal);
+        y = sum * Math.sin(tVal) - (currentr + currentO) * Math.sin(ratio * tVal);
+      }
+      return { x, y };
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      // Scale context for HDPI
+      ctx.scale(dpr, dpr);
+
+      // If not actively drawing, re-center origin
+      if (!isDrawing && !isPaused) {
+        clearCanvas();
+      }
+    }
+
+    function clearCanvas() {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      prevX = null;
+      prevY = null;
+    }
+
+    function getStrokeStyle(tVal) {
+      const mode = colorMode.value;
+
+      if (mode === 'rainbow') {
+        const hue = (tVal * 50) % 360;
+        return `hsl(${hue}, 85%, 60%)`;
+      } else if (mode === 'randomSegment') {
+        // Random Hex color as requested in assignment spec
+        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+      } else if (mode === 'neonGlow') {
+        const hue = (200 + tVal * 30) % 360;
+        return `hsl(${hue}, 100%, 65%)`;
+      } else if (mode === 'fire') {
+        const hue = (tVal * 20) % 60; // Warm range: 0-60
+        return `hsl(${hue}, 95%, 55%)`;
+      } else {
+        return singleColorPicker.value;
+      }
+    }
+
+    function drawStep() {
+      if (!isDrawing || isPaused) return;
+
+      const stepsPerFrame = parseInt(speedSlider.value, 10);
+      const dt = parseFloat(stepSlider.value);
+      const centerX = (canvas.width / (window.devicePixelRatio || 1)) / 2;
+      const centerY = (canvas.height / (window.devicePixelRatio || 1)) / 2;
+
+      ctx.lineWidth = parseFloat(lineWidth.value);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (colorMode.value === 'neonGlow') {
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(99, 102, 241, 0.8)';
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      for (let i = 0; i < stepsPerFrame; i++) {
+        let currentR = R;
+        let currentr = r;
+
+        // "Drunk Spirograph" perturb mode from assignment instructions:
+        // r += 2*Math.random()-1; R += 2*Math.random()-1;
+        if (drunkModeToggle.checked) {
+          currentr += 2 * Math.random() - 1;
+          currentR += 2 * Math.random() - 1;
+        }
+
+        const pos = getPosition(t, currentR, currentr, O, isHypotrochoid);
+        const canvasX = centerX + pos.x;
+        const canvasY = centerY + pos.y;
+
+        if (prevX !== null && prevY !== null) {
+          ctx.beginPath();
+          ctx.moveTo(prevX, prevY);
+          ctx.lineTo(canvasX, canvasY);
+          ctx.strokeStyle = getStrokeStyle(t);
+          ctx.stroke();
+        }
+
+        prevX = canvasX;
+        prevY = canvasY;
+
+        t += dt;
+
+        // Check if loop completed (unless in Drunk mode which runs infinitely)
+        if (!drunkModeToggle.checked && t >= maxT) {
+          stopDrawing(true);
+          break;
+        }
+      }
+
+      updateProgressHUD();
+
+      if (isDrawing && !isPaused) {
+        animationFrameId = requestAnimationFrame(drawStep);
+      }
+    }
+
+    function startDrawing() {
+      if (isPaused) {
+        isPaused = false;
+        isDrawing = true;
+        btnPause.disabled = false;
+        btnPause.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+        updateStatus('Drawing...', 'bg-emerald-500');
+        drawStep();
+        return;
+      }
+
+      // Reset variables for fresh draw
+      t = 0;
+      prevX = null;
+      prevY = null;
+      clearCanvas();
+      calculateCurveBounds();
+
+      isDrawing = true;
+      isPaused = false;
+
+      btnPause.disabled = false;
+      lblStart.textContent = 'Restart Drawing';
+      updateStatus('Drawing...', 'bg-emerald-500');
+
+      drawStep();
+    }
+
+    function pauseDrawing() {
+      if (!isDrawing) return;
+      isPaused = !isPaused;
+      if (isPaused) {
+        btnPause.innerHTML = '<i class="fa-solid fa-play"></i> Resume';
+        updateStatus('Paused', 'bg-amber-500');
+      } else {
+        btnPause.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+        updateStatus('Drawing...', 'bg-emerald-500');
+        drawStep();
+      }
+    }
+
+    function stopDrawing(completed = false) {
+      isDrawing = false;
+      isPaused = false;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      btnPause.disabled = true;
+      btnPause.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+
+      if (completed) {
+        updateStatus('Drawing Complete', 'bg-indigo-500');
+      } else {
+        updateStatus('Stopped', 'bg-slate-500');
+      }
+    }
+
+    function updateStatus(text, bgClass) {
+      statusText.textContent = text;
+      statusIndicator.className = `inline-block w-2.5 h-2.5 rounded-full ${bgClass}`;
+    }
+
+    function updateProgressHUD() {
+      const current = Math.min(t, maxT).toFixed(2);
+      const total = maxT > 0 ? maxT.toFixed(2) : '∞';
+      hudProgress.textContent = `${current} / ${total}`;
+    }
+
+    function syncParametersFromInputs() {
+      R = parseFloat(inputR.value) || 120;
+      r = parseFloat(inputr.value) || 48;
+      O = parseFloat(inputO.value) || 50;
+
+      sliderR.value = R;
+      sliderr.value = r;
+      sliderO.value = O;
+
+      rangeValR.textContent = `${R} px`;
+      rangeValr.textContent = `${r} px`;
+      rangeValO.textContent = `${O} px`;
+
+      // Constraint Validation Notice
+      if (isHypotrochoid && r > R) {
+        valErrorr.classList.remove('hidden');
+      } else {
+        valErrorr.classList.add('hidden');
+      }
+
+      calculateCurveBounds();
+    }
+
+    function syncParametersFromSliders() {
+      R = parseFloat(sliderR.value);
+      r = parseFloat(sliderr.value);
+      O = parseFloat(sliderO.value);
+
+      inputR.value = R;
+      inputr.value = r;
+      inputO.value = O;
+
+      rangeValR.textContent = `${R} px`;
+      rangeValr.textContent = `${r} px`;
+      rangeValO.textContent = `${O} px`;
+
+      if (isHypotrochoid && r > R) {
+        valErrorr.classList.remove('hidden');
+      } else {
+        valErrorr.classList.add('hidden');
+      }
+
+      calculateCurveBounds();
+    }
+
+    // Attach Input Event Listeners
+    sliderR.addEventListener('input', () => { syncParametersFromSliders(); if (isDrawing) startDrawing(); });
+    sliderr.addEventListener('input', () => { syncParametersFromSliders(); if (isDrawing) startDrawing(); });
+    sliderO.addEventListener('input', () => { syncParametersFromSliders(); if (isDrawing) startDrawing(); });
+
+    inputR.addEventListener('change', () => { syncParametersFromInputs(); if (isDrawing) startDrawing(); });
+    inputr.addEventListener('change', () => { syncParametersFromInputs(); if (isDrawing) startDrawing(); });
+    inputO.addEventListener('change', () => { syncParametersFromInputs(); if (isDrawing) startDrawing(); });
+
+    lineWidth.addEventListener('input', (e) => { widthVal.textContent = e.target.value; });
+
+    // Mode Toggle (Hypotrochoid / Epitrochoid)
+    typeHypo.addEventListener('click', () => {
+      isHypotrochoid = true;
+      typeHypo.className = "py-1.5 px-3 rounded-lg text-xs font-medium transition bg-indigo-600 text-white shadow-md";
+      typeEpi.className = "py-1.5 px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition";
+      syncParametersFromSliders();
+      if (isDrawing) startDrawing();
+    });
+
+    typeEpi.addEventListener('click', () => {
+      isHypotrochoid = false;
+      typeEpi.className = "py-1.5 px-3 rounded-lg text-xs font-medium transition bg-indigo-600 text-white shadow-md";
+      typeHypo.className = "py-1.5 px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition";
+      syncParametersFromSliders();
+      if (isDrawing) startDrawing();
+    });
+
+    // Color Selector Event
+    colorMode.addEventListener('change', (e) => {
+      if (e.target.value === 'single') {
+        singleColorContainer.classList.remove('hidden');
+      } else {
+        singleColorContainer.classList.add('hidden');
+      }
+    });
+
+    // Presets Event Handler
+    presetSelect.addEventListener('change', (e) => {
+      const key = e.target.value;
+      if (key === 'custom') return;
+      const p = presets[key];
+      if (p) {
+        inputR.value = p.R;
+        inputr.value = p.r;
+        inputO.value = p.O;
+        if (p.hypo) typeHypo.click(); else typeEpi.click();
+        syncParametersFromInputs();
+        startDrawing();
+      }
+    });
+
+    // Randomize Parameters Button
+    btnRandomize.addEventListener('click', () => {
+      presetSelect.value = 'custom';
+      inputR.value = Math.floor(Math.random() * 150) + 50; // 50 - 200
+      inputr.value = Math.floor(Math.random() * 120) + 10;  // 10 - 130
+      inputO.value = Math.floor(Math.random() * 120) + 10;  // 10 - 130
+      syncParametersFromInputs();
+      startDrawing();
+    });
+
+    // Action Control Listeners
+    btnStart.addEventListener('click', () => startDrawing());
+    btnPause.addEventListener('click', () => pauseDrawing());
+    btnClear.addEventListener('click', () => {
+      stopDrawing();
+      clearCanvas();
+      lblStart.textContent = 'Start Drawing';
+      updateStatus('Canvas Cleared', 'bg-slate-500');
+    });
+
+    // Export Canvas Image
+    btnDownload.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `Spirograph_R${R}_r${r}_O${O}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    window.onload = function() {
+      resizeCanvas();
+      syncParametersFromSliders();
+      updateStatus('Ready to draw', 'bg-indigo-500');
+    };
+  </script>
+</body>
+</html>
