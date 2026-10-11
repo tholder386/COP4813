@@ -1,0 +1,43 @@
+JSON
+{
+  "title": "Fighter Stats & Roster",
+  "lastUpdated": "2026-10-09",
+  "fighters": [
+    {
+      "id": 1,
+      "name": "Charles Oliveira",
+      "nickname": "Do Bronx",
+      "weightClass": "Lightweight",
+      "bjjBelt": "Black Belt",
+      "record": { "wins": 34, "losses": 10, "draws": 0 },
+      "specialty": "Submission Specialist"
+    },
+    {
+      "id": 2,
+      "name": "Gordon Ryan",
+      "nickname": "The King",
+      "weightClass": "Heavyweight",
+      "bjjBelt": "Black Belt",
+      "record": { "wins": 157, "losses": 9, "draws": 3 },
+      "specialty": "No-Gi Grappling"
+    },
+    {
+      "id": 3,
+      "name": "Alex Pereira",
+      "nickname": "Poatan",
+      "weightClass": "Light Heavyweight",
+      "bjjBelt": "Black Belt",
+      "record": { "wins": 12, "losses": 2, "draws": 0 },
+      "specialty": "Striking / Knockouts"
+    },
+    {
+      "id": 4,
+      "name": "Demetrious Johnson",
+      "nickname": "Mighty Mouse",
+      "weightClass": "Flyweight",
+      "bjjBelt": "Black Belt",
+      "record": { "wins": 25, "losses": 4, "draws": 1 },
+      "specialty": "Well-Rounded MMA / Takedowns"
+    }
+  ]
+}
