@@ -5,6 +5,15 @@ JSON
   "fighters": [
     {
       "id": 1,
+      "name": "Craig Jones",
+      "nickname": "The Second Best",
+      "weightClass": "Middleweight / Light Heavyweight",
+      "bjjBelt": "Black Belt",
+      "record": { "wins": 55, "losses": 20, "draws": 1 },
+      "specialty": "Leg Locks & Z-Guard"
+    },
+    {
+      "id": 2,
       "name": "Charles Oliveira",
       "nickname": "Do Bronx",
       "weightClass": "Lightweight",
@@ -13,7 +22,7 @@ JSON
       "specialty": "Submission Specialist"
     },
     {
-      "id": 2,
+      "id": 3,
       "name": "Gordon Ryan",
       "nickname": "The King",
       "weightClass": "Heavyweight",
@@ -22,7 +31,7 @@ JSON
       "specialty": "No-Gi Grappling"
     },
     {
-      "id": 3,
+      "id": 4,
       "name": "Alex Pereira",
       "nickname": "Poatan",
       "weightClass": "Light Heavyweight",
@@ -31,7 +40,7 @@ JSON
       "specialty": "Striking / Knockouts"
     },
     {
-      "id": 4,
+      "id": 5,
       "name": "Demetrious Johnson",
       "nickname": "Mighty Mouse",
       "weightClass": "Flyweight",
