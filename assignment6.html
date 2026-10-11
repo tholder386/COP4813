@@ -1,53 +1,191 @@
-JSON
-[
-  {
-    "id": 1,
-    "title": "Interactive JavaScript Calculator",
-    "category": "Web Development",
-    "description": "A dynamic JavaScript calculator and plotting tool built to render mathematical functions.",
-    "technologies": ["HTML5", "CSS3", "JavaScript", "Chart.js"],
-    "repoUrl": "https://github.com/tholder386/COP4813",
-    "liveUrl": "https://tholder386.github.io/COP4813/assignment4.html",
-    "featured": true
-  },
-  {
-    "id": 2,
-    "title": "HTML5 Canvas Spirograph Generator",
-    "category": "Graphics & Canvas",
-    "description": "An interactive HTML5 Canvas drawing tool generating hypotrochoid and epitrochoid curves in real time.",
-    "technologies": ["HTML5 Canvas", "JavaScript", "CSS Grid"],
-    "repoUrl": "https://github.com/tholder386/COP4813",
-    "liveUrl": "https://tholder386.github.io/COP4813/assignment5.html",
-    "featured": true
-  },
-  {
-    "id": 3,
-    "title": "User Registration & Form Validation",
-    "category": "Front-End Forms",
-    "description": "Custom user intake form featuring real-time client-side regex validation, input masking, and responsive modal summaries.",
-    "technologies": ["HTML5", "CSS3", "JavaScript ES6"],
-    "repoUrl": "https://github.com/tholder386/COP4813",
-    "liveUrl": "https://tholder386.github.io/COP4813/assignment3.html",
-    "featured": false
-  },
-  {
-    "id": 4,
-    "title": "Network Packet Analyzer UI",
-    "category": "Cybersecurity",
-    "description": "Dashboard layout displaying network traffic logs, protocol statistics, and incident response metrics.",
-    "technologies": ["HTML5", "JSON", "Bootstrap"],
-    "repoUrl": "https://github.com/tholder386/COP4813",
-    "liveUrl": "https://tholder386.github.io/COP4813/assignment6.html",
-    "featured": false
-  },
-  {
-    "id": 5,
-    "title": "Dynamic JSON Data Viewer",
-    "category": "Web Systems",
-    "description": "Asynchronous fetch viewer that retrieves structured JSON datasets and dynamically builds portfolio UI cards.",
-    "technologies": ["JavaScript Fetch API", "JSON", "DOM Manipulation"],
-    "repoUrl": "https://github.com/tholder386/COP4813",
-    "liveUrl": "https://tholder386.github.io/COP4813/assignment6.html",
-    "featured": true
-  }
-]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 6 - JSON Data Parser</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #38bdf8;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-color);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      color: #ffffff;
+    }
+
+    .nickname {
+      color: var(--accent-color);
+      font-style: italic;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .value {
+      color: var(--text-color);
+    }
+
+    .error-msg {
+      background-color: #7f1d1d;
+      color: #fecaca;
+      padding: 1rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1 id="page-title">Loading JSON Data...</h1>
+      <p class="subtitle" id="last-updated"></p>
+    </header>
+
+    <main id="fighter-grid" class="grid-container">
+      <!-- Dynamic JSON content renders here -->
+    </main>
+
+    <footer>
+      <p>COP4813 Web Systems I &mdash; Assignment 6: External JSON Parsing</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch external JSON file
+      fetch('data.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Set Title and Last Updated metadata
+          document.getElementById('page-title').textContent = data.title;
+          document.getElementById('last-updated').textContent = `Last Updated: ${data.lastUpdated}`;
+
+          const grid = document.getElementById('fighter-grid');
+          grid.innerHTML = ''; // Clear loading state
+
+          // Loop through array and build HTML cards
+          data.fighters.forEach(fighter => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            card.innerHTML = `
+              <h2>${fighter.name}</h2>
+              <div class="nickname">"${fighter.nickname}"</div>
+              <div class="detail-item">
+                <span class="label">Weight Class:</span>
+                <span class="value">${fighter.weightClass}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">BJJ Rank:</span>
+                <span class="value">${fighter.bjjBelt}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Record (W-L-D):</span>
+                <span class="value">${fighter.record.wins}-${fighter.record.losses}-${fighter.record.draws}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Style:</span>
+                <span class="value">${fighter.specialty}</span>
+              </div>
+            `;
+
+            grid.appendChild(card);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching JSON data:', error);
+          const grid = document.getElementById('fighter-grid');
+          grid.innerHTML = `
+            <div class="error-msg">
+              <strong>Failed to load data:</strong> Please check that <code>data.json</code> exists in the same folder and you are running via a local web server or GitHub Pages.
+            </div>
+          `;
+        });
+    });
+  </script>
+</body>
+</html>
