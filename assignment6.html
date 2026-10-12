@@ -22,6 +22,11 @@
       padding: 2rem;
     }
 
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
     header {
       text-align: center;
       margin-bottom: 2rem;
@@ -35,11 +40,6 @@
     p.subtitle {
       color: var(--text-muted);
       font-size: 0.95rem;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
     }
 
     .grid-container {
@@ -92,16 +92,13 @@
       font-weight: 600;
     }
 
-    .value {
-      color: var(--text-color);
-    }
-
-    .error-msg {
-      background-color: #7f1d1d;
-      color: #fecaca;
-      padding: 1rem;
-      border-radius: 6px;
-      text-align: center;
+    .error-box {
+      background-color: #450a0a;
+      border: 1px solid #dc2626;
+      color: #fca5a5;
+      padding: 1.5rem;
+      border-radius: 8px;
+      line-height: 1.6;
     }
 
     footer {
@@ -131,23 +128,23 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Fetch external JSON file
-      fetch('data.json')
+      // Relative path to data.json in the same folder
+      const jsonUrl = './data.json';
+
+      fetch(jsonUrl)
         .then(response => {
           if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            throw new Error(`HTTP ${response.status}: ${response.statusText} when fetching ${jsonUrl}`);
           }
           return response.json();
         })
         .then(data => {
-          // Set Title and Last Updated metadata
           document.getElementById('page-title').textContent = data.title;
           document.getElementById('last-updated').textContent = `Last Updated: ${data.lastUpdated}`;
 
           const grid = document.getElementById('fighter-grid');
-          grid.innerHTML = ''; // Clear loading state
+          grid.innerHTML = '';
 
-          // Loop through array and build HTML cards
           data.fighters.forEach(fighter => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -157,31 +154,38 @@
               <div class="nickname">"${fighter.nickname}"</div>
               <div class="detail-item">
                 <span class="label">Weight Class:</span>
-                <span class="value">${fighter.weightClass}</span>
+                <span>${fighter.weightClass}</span>
               </div>
               <div class="detail-item">
                 <span class="label">BJJ Rank:</span>
-                <span class="value">${fighter.bjjBelt}</span>
+                <span>${fighter.bjjBelt}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Record (W-L-D):</span>
-                <span class="value">${fighter.record.wins}-${fighter.record.losses}-${fighter.record.draws}</span>
+                <span>${fighter.record.wins}-${fighter.record.losses}-${fighter.record.draws}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Style:</span>
-                <span class="value">${fighter.specialty}</span>
+                <span class="label">Specialty:</span>
+                <span>${fighter.specialty}</span>
               </div>
             `;
 
             grid.appendChild(card);
           });
         })
-        .catch(error => {
-          console.error('Error fetching JSON data:', error);
+        .catch(err => {
+          console.error('Fetch Error:', err);
           const grid = document.getElementById('fighter-grid');
           grid.innerHTML = `
-            <div class="error-msg">
-              <strong>Failed to load data:</strong> Please check that <code>data.json</code> exists in the same folder and you are running via a local web server or GitHub Pages.
+            <div class="error-box">
+              <h3>Unable to load data.json</h3>
+              <p><strong>Error Details:</strong> ${err.message}</p>
+              <p><strong>Troubleshooting Steps:</strong></p>
+              <ul>
+                <li>Verify <code>data.json</code> is saved in the exact same folder as <code>assignment6.html</code>.</li>
+                <li>Ensure the file extension is lowercase <code>.json</code> and not <code>.json.txt</code>.</li>
+                <li>If viewing locally, open via Live Server or a local server instead of opening the <code>file:///</code> path directly in your browser.</li>
+              </ul>
             </div>
           `;
         });
