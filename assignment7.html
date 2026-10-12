@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 7 - HTML5 Drag & Drop Card Interface</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #38bdf8;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --felt-green: #064e3b;
+      --felt-border: #047857;
+      --gold-accent: #f59e0b;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Controls Header */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      background-color: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    button:hover {
+      background-color: var(--accent-color);
+      color: #0f172a;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Table Top Playing Surface */
+    .tabletop {
+      background-color: var(--felt-green);
+      border: 4px solid var(--felt-border);
+      border-radius: 12px;
+      padding: 2rem;
+      min-height: 380px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #a7f3d0;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    /* Hand Area */
+    .hand-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-content: flex-start;
+      min-height: 180px;
+      padding: 1rem;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+    }
+
+    /* Discard Drop Zone Target */
+    .discard-zone {
+      border: 3px dashed var(--gold-accent);
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      text-align: center;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      position: relative;
+    }
+
+    .discard-zone.drag-over {
+      background-color: rgba(245, 158, 11, 0.2);
+      border-color: #fbbf24;
+    }
+
+    .discard-zone .icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .discard-zone p {
+      margin: 0;
+      color: #fef3c7;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* Playing Card Styling */
+    .card {
+      width: 100px;
+      height: 140px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 0.5rem;
+      box-sizing: border-box;
+      user-select: none;
+      cursor: grab;
+      transition: transform 0.15 ease, box-shadow 0.15s ease;
+    }
+
+    .card:active {
+      cursor: grabbing;
+    }
+
+    .card.dragging {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+
+    .card .corner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .card .corner.bottom {
+      transform: rotate(180deg);
+    }
+
+    .card .suit-center {
+      font-size: 2.2rem;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .card.red {
+      color: #dc2626;
+    }
+
+    .card.black {
+      color: #1e293b;
+    }
+
+    /* Event Capture Feedback Box */
+    .event-logger {
+      margin-top: 2rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .event-logger h3 {
+      margin-top: 0;
+      color: var(--accent-color);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .log-box {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      background-color: #090d16;
+      border: 1px solid var(--border-color);
+      padding: 0.75rem;
+      border-radius: 4px;
+      max-height: 120px;
+      overflow-y: auto;
+      color: #34d399;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Assignment 7: Drag &amp; Drop Card Interface</h1>
+      <p class="subtitle">HTML5 Native Drag &amp; Drop API &mdash; COP4813 Web Systems I</p>
+    </header>
+
+    <div class="controls">
+      <button id="deal-btn">Deal 5-Card Hand</button>
+      <button id="reset-btn" style="background-color: #475569;">Reset Deck</button>
+    </div>
+
+    <div class="tabletop">
+      <div>
+        <div class="section-title">Player Hand</div>
+        <div id="hand" class="hand-container">
+          <!-- Cards dynamically render here -->
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Discard Zone</div>
+        <div id="discard-target" class="discard-zone">
+          <div class="icon">&#128465;&#65039;</div>
+          <p>Drag Cards Here to Discard</p>
+          <div id="discard-count" style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+            Discarded: 0
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Capture Logger Required by Assignment -->
+    <div class="event-logger">
+      <h3>Captured Drag &amp; Drop Events Log</h3>
+      <div id="event-log" class="log-box">System initialized. Click "Deal 5-Card Hand" to start.</div>
+    </div>
+
+    <footer>
+      <p>COP4813 Web Systems I &mdash; Assignment 7</p>
+    </footer>
+  </div>
+
+  <script>
+    // 1. Deck Setup Data Structures
+    const suits = [
+      { name: 'Spades', symbol: '&spades;', color: 'black' },
+      { name: 'Hearts', symbol: '&hearts;', color: 'red' },
+      { name: 'Diamonds', symbol: '&diams;', color: 'red' },
+      { name: 'Clubs', symbol: '&clubs;', color: 'black' }
+    ];
+
+    const values = [
+      { rank: 'A', name: 'Ace' },
+      { rank: '2', name: '2' },
+      { rank: '3', name: '3' },
+      { rank: '4', name: '4' },
+      { rank: '5', name: '5' },
+      { rank: '6', name: '6' },
+      { rank: '7', name: '7' },
+      { rank: '8', name: '8' },
+      { rank: '9', name: '9' },
+      { rank: '10', name: '10' },
+      { rank: 'J', name: 'Jack' },
+      { rank: 'Q', name: 'Queen' },
+      { rank: 'K', name: 'King' }
+    ];
+
+    let fullDeck = [];
+    let discardedCount = 0;
+
+    // Initialize full 52-card deck
+    function buildDeck() {
+      fullDeck = [];
+      suits.forEach(suit => {
+        values.forEach(val => {
+          fullDeck.push({
+            id: `${val.rank}-${suit.name}`,
+            rank: val.rank,
+            name: `${val.name} of ${suit.name}`,
+            suitSymbol: suit.symbol,
+            color: suit.color
+          });
+        });
+      });
+    }
+
+    // Logger helper to demonstrateCaptured Events
+    function logEvent(message) {
+      const logBox = document.getElementById('event-log');
+      const time = new Date().toLocaleTimeString();
+      logBox.innerHTML = `[${time}] ${message}<br>` + logBox.innerHTML;
+    }
+
+    // 2. Deal Cards Function
+    function dealHand(cardCount = 5) {
+      const handContainer = document.getElementById('hand');
+      handContainer.innerHTML = '';
+      
+      if (fullDeck.length < cardCount) {
+        buildDeck();
+        logEvent('Deck reshuffled.');
+      }
+
+      // Shuffle deck using Fisher-Yates
+      for (let i = fullDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[i]];
+      }
+
+      // Deal specified number of unique cards
+      for (let i = 0; i < cardCount; i++) {
+        const cardData = fullDeck.pop();
+        const cardElement = createCardElement(cardData);
+        handContainer.appendChild(cardElement);
+      }
+
+      logEvent(`EVENT TRIGGERED: Dealt ${cardCount} cards to player hand.`);
+    }
+
+    // Create Draggable HTML Card DOM Node
+    function createCardElement(cardData) {
+      const card = document.createElement('div');
+      card.className = `card ${cardData.color}`;
+      card.id = `card-${cardData.id}`;
+      card.setAttribute('draggable', 'true');
+      card.dataset.cardName = cardData.name;
+
+      card.innerHTML = `
+        <div class="corner top">
+          <span>${cardData.rank}</span>
+          <span>${cardData.suitSymbol}</span>
+        </div>
+        <div class="suit-center">${cardData.suitSymbol}</div>
+        <div class="corner bottom">
+          <span>${cardData.rank}</span>
+          <span>${cardData.suitSymbol}</span>
+        </div>
+      `;
+
+      // Attach Native HTML5 Drag Event Listeners
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragend', handleDragEnd);
+
+      return card;
+    }
+
+    // 3. HTML5 Drag & Drop Event Handlers
+    function handleDragStart(e) {
+      e.dataTransfer.setData('text/plain', e.target.id);
+      e.dataTransfer.setData('cardName', e.target.dataset.cardName);
+      e.dataTransfer.effectAllowed = 'move';
+      
+      e.target.classList.add('dragging');
+      logEvent(`EVENT CAPTURED: dragstart on "${e.target.dataset.cardName}"`);
+    }
+
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+    }
+
+    // Setup Discard Target Listener Logic
+    const discardZone = document.getElementById('discard-target');
+
+    discardZone.addEventListener('dragover', (e) => {
+      e.preventDefault(); // Necessary to allow drop
+      e.dataTransfer.dropEffect = 'move';
+      discardZone.classList.add('drag-over');
+    });
+
+    discardZone.addEventListener('dragleave', () => {
+      discardZone.classList.remove('drag-over');
+    });
+
+    discardZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      discardZone.classList.remove('drag-over');
+
+      const cardId = e.dataTransfer.getData('text/plain');
+      const cardName = e.dataTransfer.getData('cardName');
+      const cardElement = document.getElementById(cardId);
+
+      if (cardElement) {
+        cardElement.remove(); // Remove card from hand
+        discardedCount++;
+        document.getElementById('discard-count').textContent = `Discarded: ${discardedCount}`;
+        
+        // Trigger capture alert/notification event as requested by rubric
+        logEvent(`SUCCESSFUL DROP EVENT: Dropped "${cardName}" into Discard Zone!`);
+      }
+    });
+
+    // 4. Interface Controls Event Listeners
+    document.getElementById('deal-btn').addEventListener('click', () => {
+      dealHand(5);
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      buildDeck();
+      discardedCount = 0;
+      document.getElementById('discard-count').textContent = 'Discarded: 0';
+      document.getElementById('hand').innerHTML = '';
+      logEvent('Table reset.');
+    });
+
+    // Initialize Deck on page load
+    buildDeck();
+    dealHand(5);
+  </script>
+</body>
+</html>
