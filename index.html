@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Lighthouse Mobile Audit & Performance Analysis Report for COP4813 Assignment 10.">
-  <title>Assignment 10: Mobile Lighthouse Audit Report</title>
+  <meta name="description" content="Personal Web Development Portfolio & Coursework Directory for COP4813.">
+  <title>Trevon Holder | Web Systems Portfolio</title>
   <style>
     :root {
       --bg-color: #0f111a;
@@ -12,7 +12,10 @@
       --accent-purple: #7c4dff;
       --accent-cyan: #00e5ff;
       --text-main: #e0e6ed;
-      --green-score: #00cc66;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -20,119 +23,212 @@
       color: var(--text-main);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      padding: 0;
     }
 
-    .container {
-      max-width: 900px;
-      width: 100%;
+    /* --- Navigation Bar --- */
+    .navbar {
       background-color: var(--card-bg);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(124, 77, 255, 0.2);
+      border-bottom: 1px solid rgba(124, 77, 255, 0.3);
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
-    h1, h2 {
-      color: var(--accent-cyan);
-    }
-
-    .score-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
-      margin: 25px 0;
-    }
-
-    .score-card {
-      background-color: #05060a;
-      border: 2px solid var(--green-score);
-      border-radius: 10px;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .score-number {
-      font-size: 2.5rem;
+    .nav-brand {
+      font-size: 1.3rem;
       font-weight: bold;
-      color: var(--green-score);
-    }
-
-    .score-label {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin-top: 5px;
-    }
-
-    .report-section {
-      background-color: #121524;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      border-left: 4px solid var(--accent-purple);
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 25px;
-      color: var(--accent-purple);
+      color: var(--accent-cyan);
       text-decoration: none;
     }
 
-    .back-link:hover {
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
       color: var(--accent-cyan);
-      text-decoration: underline;
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: 5px 10px;
+      min-width: 48px;
+      min-height: 48px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+
+    .nav-link, .dropdown-toggle {
+      color: var(--text-main);
+      text-decoration: none;
+      padding: 10px 15px;
+      display: block;
+      border-radius: 6px;
+      min-height: 44px;
+    }
+
+    .nav-link:hover, .dropdown-toggle:hover {
+      color: var(--accent-cyan);
+      background-color: rgba(124, 77, 255, 0.15);
+    }
+
+    /* Dropdown Styling */
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: var(--card-bg);
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      border-radius: 8px;
+      list-style: none;
+      padding: 10px 0;
+      min-width: 260px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+
+    .dropdown-menu a {
+      color: var(--text-main);
+      padding: 12px 20px;
+      text-decoration: none;
+      display: block;
+      min-height: 44px;
+    }
+
+    .dropdown-menu a:hover {
+      background-color: var(--accent-purple);
+      color: #fff;
+    }
+
+    .dropdown.active .dropdown-menu {
+      display: block;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .hero-card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(124, 77, 255, 0.2);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      color: var(--accent-cyan);
+      margin-top: 0;
+    }
+
+    /* --- Mobile Responsive Layout (Media Query) --- */
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: var(--card-bg);
+        border-bottom: 1px solid rgba(124, 77, 255, 0.3);
+        padding: 15px 0;
+      }
+
+      .nav-menu.active {
+        display: flex;
+      }
+
+      .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        background-color: rgba(15, 17, 26, 0.5);
+        border: none;
+        padding-left: 20px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Assignment 10: Mobile &amp; Lighthouse Audit Report</h1>
-    <p>This page documents the Chrome DevTools Lighthouse audit for the mobile-responsive implementation of my primary portfolio homepage (<code>index.html</code>).</p>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">Trevon Holder</a>
+    <button class="menu-toggle" id="mobileMenuBtn" aria-label="Toggle Navigation Menu">&#9776;</button>
 
-    <!-- Overall Lighthouse Scores Breakdown -->
-    <h2>Overall Audit Scores (Mobile Navigation Mode)</h2>
-    <div class="score-grid">
-      <div class="score-card">
-        <div class="score-number">98</div>
-        <div class="score-label">Performance</div>
-      </div>
-      <div class="score-card">
-        <div class="score-number">100</div>
-        <div class="score-label">Accessibility</div>
-      </div>
-      <div class="score-card">
-        <div class="score-number">100</div>
-        <div class="score-label">Best Practices</div>
-      </div>
-      <div class="score-card">
-        <div class="score-number">100</div>
-        <div class="score-label">SEO</div>
-      </div>
-    </div>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li class="dropdown" id="assignmentsDropdown">
+        <a href="#" class="dropdown-toggle" id="dropdownBtn">Assignments &#9662;</a>
+        <ul class="dropdown-menu">
+          <li><a href="assignment1/index.html">Assignment 1 - Hosting Setup</a></li>
+          <li><a href="assignment2/index.html">Assignment 2 - CSS Styling</a></li>
+          <li><a href="assignment3.html">Assignment 3 - Form &amp; Validation</a></li>
+          <li><a href="assignment4/index.html">Assignment 4 - Scatter Plot Calculator</a></li>
+          <li><a href="assignment5.html">Assignment 5 - Canvas Spirograph</a></li>
+          <li><a href="assignment6/index.html">Assignment 6 - Fighter Roster (JSON)</a></li>
+          <li><a href="assignment7.html">Assignment 7 - Card Dealer</a></li>
+          <li><a href="assignment9.html">Assignment 9 - Canvas Animation</a></li>
+          <li><a href="audit.html">Assignment 10 - Mobile Lighthouse Audit</a></li>
+        </ul>
+      </li>
+      <li><a href="audit.html" class="nav-link">Lighthouse Audit</a></li>
+    </ul>
+  </nav>
 
-    <!-- Technical Analysis Breakdown -->
-    <div class="report-section">
-      <h2>Mobile Optimization Analysis &amp; Findings</h2>
-      
-      <h3>1. Responsive Layout &amp; Viewport Configuration</h3>
-      <p>Configured <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code> to ensure content scales dynamically across screen widths. Utilized CSS Flexbox and media queries (<code>@media (max-width: 768px)</code>) to convert top desktop navigation links into a collapsible mobile hamburger drawer.</p>
+  <!-- Main Content -->
+  <main class="container">
+    <section class="hero-card">
+      <h1>COP4813 Web Systems Portfolio</h1>
+      <p>Welcome to my main coursework hub. This site is fully optimized for desktop and mobile viewports, adhering to modern accessibility (WCAG), SEO, and performance standards.</p>
+    </section>
+  </main>
 
-      <h3>2. Accessibility &amp; Touch Targets (WCAG 2.1)</h3>
-      <p>All interactive elements (menu items, dropdown links, toggle buttons) adhere to a minimum touch target size of 44x44 pixels to accommodate mobile thumb navigation. Color contrast ratios between text (<code>#e0e6ed</code>) and background surfaces (<code>#1a1d2e</code>) exceed the 4.5:1 WCAG requirement.</p>
+  <!-- Mobile Menu Event Handling Script -->
+  <script>
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const assignmentsDropdown = document.getElementById('assignmentsDropdown');
 
-      <h3>3. SEO &amp; Best Practices</h3>
-      <p>Configured valid page metadata description tags, semantic HTML tags (<code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;section&gt;</code>), and eliminated HTTPS mixed-content warnings during server deployment on GitHub Pages.</p>
-    </div>
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navMenu.classList.toggle('active');
+    });
 
-    <div>
-      <a href="index.html" class="back-link">&larr; Back to Main Portfolio</a>
-    </div>
-  </div>
+    dropdownBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      assignmentsDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        navMenu.classList.remove('active');
+        assignmentsDropdown.classList.remove('active');
+      }
+    });
+  </script>
 
 </body>
 </html>
