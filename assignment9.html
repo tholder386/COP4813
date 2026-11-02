@@ -1,9 +1,10 @@
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> assignment 9: Canvas Animation</title>
+  <title>Assignment 9: Canvas Animation</title>
   <style>
     :root {
       --bg-color: #0f111a;
@@ -54,44 +55,58 @@
       cursor: pointer;
       box-shadow: 0 0 15px rgba(124, 77, 255, 0.3);
     }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: var(--accent-purple);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      color: var(--accent-cyan);
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>Canvas Interactive Bounce &amp; Explosion</h1>
-    <p>Click the bouncing orb to trigger a particle explosion and directional shockwave!</p>
+    <p>Click the bouncing orb to trigger a particle explosion and directional shift!</p>
     <canvas id="animCanvas" width="600" height="400"></canvas>
-  </div>
+    <div>
+      <a href="index.html" class="back-link">&larr; Back to Main Portfolio</a>
+    </div>
+  </div> 
 
   <script>
     const canvas = document.getElementById('animCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Bouncing Ball Object (Part 1)
+    // Bouncing Object (Starts diagonally at 45 degrees: dx == dy)
     const ball = {
       x: 50,
       y: 50,
       radius: 20,
-      dx: 4, // Horizontal velocity
-      dy: 4, // Vertical velocity (45-degree movement when dx == dy)
+      dx: 4,
+      dy: 4,
       color: '#00e5ff',
       glowColor: 'rgba(0, 229, 255, 0.6)'
     };
 
-    // Array to manage active particle effects (Part 2)
     let particles = [];
 
-    // Particle constructor for the click explosion
+    // Particle constructor for mouse click explosion
     class Particle {
       constructor(x, y) {
         this.x = x;
         this.y = y;
         this.radius = Math.random() * 4 + 2;
-        // Random explosion trajectories
         this.dx = (Math.random() - 0.5) * 10;
         this.dy = (Math.random() - 0.5) * 10;
-        this.color = `hsl(${Math.random() * 60 + 260}, 100%, 65%)`; // Purple/pink palette
+        this.color = `hsl(${Math.random() * 60 + 260}, 100%, 65%)`;
         this.alpha = 1;
         this.decay = Math.random() * 0.03 + 0.015;
       }
@@ -115,27 +130,23 @@
       }
     }
 
-    // Main animation loop
     function animate() {
-      // Clear frame with slight opacity for motion blur trail
+      // Motion blur trail fill
       ctx.fillStyle = 'rgba(5, 6, 10, 0.3)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // --- Part 1: Movement & Bounded Wall Collision ---
+      // Part 1: Bounded wall bouncing
       ball.x += ball.dx;
       ball.y += ball.dy;
 
-      // Bounce off horizontal walls (Left / Right)
       if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx *= -1; // Reverse horizontal direction
+        ball.dx *= -1;
       }
-
-      // Bounce off vertical walls (Top / Bottom)
       if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
-        ball.dy *= -1; // Reverse vertical direction
+        ball.dy *= -1;
       }
 
-      // Draw Main Object
+      // Draw Main Sphere
       ctx.save();
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -146,12 +157,10 @@
       ctx.closePath();
       ctx.restore();
 
-      // --- Part 2: Render & Update Particle Explosion Effects ---
+      // Part 2: Explosion Particles Rendering
       for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].update();
         particles[i].draw();
-
-        // Remove faded particles
         if (particles[i].alpha <= 0) {
           particles.splice(i, 1);
         }
@@ -160,36 +169,29 @@
       requestAnimationFrame(animate);
     }
 
-    // --- Part 2: Interactive Mouse Click Handling ---
+    // Part 2: Mouse Click Interaction
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
-      // Calculate distance between mouse click and ball center
       const distance = Math.hypot(mouseX - ball.x, mouseY - ball.y);
 
-      // Check if click occurred inside the ball boundary
       if (distance <= ball.radius) {
-        // 1. Trigger explosion burst of 30 particles
+        // Spawn explosion
         for (let i = 0; i < 30; i++) {
           particles.push(new Particle(ball.x, ball.y));
         }
-
-        // 2. Change velocity/direction randomly on impact
+        // Change velocity and trajectory
         ball.dx = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 + 3);
         ball.dy = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 3 + 3);
-
-        // 3. Shift color theme on hit
+        // Shift color
         const randomHue = Math.floor(Math.random() * 360);
         ball.color = `hsl(${randomHue}, 100%, 60%)`;
         ball.glowColor = `hsl(${randomHue}, 100%, 75%)`;
       }
     });
 
-    // Start animation loop
     animate();
   </script>
-
 </body>
 </html>
