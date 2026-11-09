@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="COP4813 Assignment 11 - Interactive BSIT Degree Advising & Drag/Drop Planner">
+  <title>BSIT Degree Advising &amp; Course Planner | Daytona State College</title>
+  <style>
+    :root {
+      --bg-color: #0f111a;
+      --card-bg: #1a1d2e;
+      --panel-bg: #121524;
+      --accent-purple: #7c4dff;
+      --accent-cyan: #00e5ff;
+      --text-main: #e0e6ed;
+      --text-muted: #94a3b8;
+      --green-available: #00e676;
+      --red-locked: #ff5252;
+      --gold-planned: #ffd700;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      color: var(--accent-cyan);
+      margin-bottom: 5px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Credit Summary Counter */
+    .summary-bar {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      background-color: var(--card-bg);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      margin-bottom: 25px;
+    }
+
+    .stat-box {
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: var(--accent-cyan);
+    }
+
+    .stat-lbl {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Drag & Drop Main Layout */
+    .planner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 992px) {
+      .planner-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .drop-column {
+      background-color: var(--panel-bg);
+      border: 2px dashed rgba(124, 77, 255, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drop-column.drag-over {
+      border-color: var(--accent-cyan);
+      background-color: rgba(0, 229, 255, 0.05);
+    }
+
+    .column-header {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent-purple);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .course-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Dynamically Generated Course Cards */
+    .course-card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(124, 77, 255, 0.2);
+      border-left: 5px solid var(--red-locked);
+      border-radius: 8px;
+      padding: 14px;
+      cursor: grab;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .course-card:active {
+      cursor: grabbing;
+    }
+
+    .course-card.available {
+      border-left-color: var(--green-available);
+    }
+
+    .course-card.completed {
+      border-left-color: var(--accent-cyan);
+      opacity: 0.85;
+    }
+
+    .course-card.planned {
+      border-left-color: var(--gold-planned);
+    }
+
+    .course-card.disabled-or {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(80%);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .course-code {
+      font-weight: bold;
+      color: var(--accent-cyan);
+    }
+
+    .course-credits {
+      background-color: rgba(124, 77, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .course-title {
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .info-btn {
+      background: none;
+      border: none;
+      color: var(--accent-purple);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0 4px;
+    }
+
+    .info-btn:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* Info Modal Popup */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      padding: 25px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(124, 77, 255, 0.3);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 25px;
+      color: var(--accent-purple);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--accent-cyan);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>BSIT Degree Advising &amp; Course Planner</h1>
+    <p class="subtitle">Daytona State College — B.S. in Information Technology Catalog Advisor</p>
+  </header>
+
+  <!-- Dynamic Credit Audit Summary -->
+  <div class="summary-bar">
+    <div class="stat-box">
+      <div class="stat-val" id="completedCredits">0</div>
+      <div class="stat-lbl">Completed Credits</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="plannedCredits">0</div>
+      <div class="stat-lbl">Planned Credits</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="remainingCredits">24</div>
+      <div class="stat-lbl">Remaining Credits</div>
+    </div>
+  </div>
+
+  <!-- Interactive Drag & Drop Planner Grid -->
+  <div class="planner-grid">
+    <!-- Column 1: Completed / Transfer Courses -->
+    <div class="drop-column" id="col-completed" data-status="completed">
+      <div class="column-header">
+        <span>Completed Courses</span>
+        <span style="color: var(--accent-cyan);">&#10003;</span>
+      </div>
+      <div class="course-list" id="list-completed"></div>
+    </div>
+
+    <!-- Column 2: Available Courses (Dynamic Prerequisites Met) -->
+    <div class="drop-column" id="col-available" data-status="available">
+      <div class="column-header">
+        <span>Eligible to Register</span>
+        <span style="color: var(--green-available);">&#9733;</span>
+      </div>
+      <div class="course-list" id="list-available"></div>
+    </div>
+
+    <!-- Column 3: Upcoming Semester Schedule -->
+    <div class="drop-column" id="col-planned" data-status="planned">
+      <div class="column-header">
+        <span>Planned Schedule</span>
+        <span style="color: var(--gold-planned);">&#128197;</span>
+      </div>
+      <div class="course-list" id="list-planned"></div>
+    </div>
+  </div>
+
+  <div style="text-align: center;">
+    <a href="index.html" class="back-link">&larr; Back to Main Portfolio</a>
+  </div>
+
+  <!-- Course Notes & Details Modal -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="margin: 0; color: var(--accent-cyan);">Course Details</h3>
+        <button class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // Requirement 1: Representative JSON Data Structure for BSIT Course Program
+    const bsitProgramData = [
+      {
+        id: "COP2800",
+        code: "COP 2800",
+        title: "Java Programming",
+        credits: 3,
+        prereqs: [], // No prereqs
+        orGroup: "INTRO_PROG", // OR Prerequisite condition with COP2001
+        note: "Satisfies Core Programming requirement. Students must select EITHER COP2800 OR COP2001, but do not need both."
+      },
+      {
+        id: "COP2001",
+        code: "COP 2001",
+        title: "C Programming",
+        credits: 3,
+        prereqs: [],
+        orGroup: "INTRO_PROG",
+        note: "Satisfies Core Programming requirement. Students must select EITHER COP2800 OR COP2001, but do not need both."
+      },
+      {
+        id: "COP4813",
+        code: "COP 4813",
+        title: "Web Systems Development",
+        credits: 3,
+        prereqs: { type: "OR", courses: ["COP2800", "COP2001"] }, // Requires COP2800 OR COP2001
+        note: "Focuses on advanced client/server scripting, dynamic UI creation, and enterprise web integration."
+      },
+      {
+        id: "CET4862",
+        code: "CET 4862",
+        title: "Network Forensics & Incident Response",
+        credits: 3,
+        prereqs: { type: "AND", courses: ["CTS1134"] },
+        note: "Covers volatile memory captures, packet analysis, and digital evidence handling."
+      },
+      {
+        id: "CTS1134",
+        code: "CTS 1134",
+        title: "Network+ Fundamentals",
+        credits: 3,
+        prereqs: [],
+        note: "Introductory networking concepts covering OSI model, TCP/IP, and routing protocols."
+      },
+      {
+        id: "ISM4300",
+        code: "ISM 4300",
+        title: "Information Systems Operations & Governance",
+        credits: 3,
+        prereqs: { type: "AND", courses: ["CTS1134", "COP4813"] }, // Requires both CTS1134 AND COP4813
+        note: "Enterprise IT service management, HIPAA compliance, and system administration workflows."
+      },
+      {
+        id: "CNT4703",
+        code: "CNT 4703",
+        title: "Voice and Data Network Design",
+        credits: 3,
+        prereqs: { type: "AND", courses: ["CTS1134"] },
+        note: "Enterprise architecture design for telecommunications and campus data networks."
+      },
+      {
+        id: "CAP4770",
+        code: "CAP 4770",
+        title: "Data Mining & Business Intelligence",
+        credits: 3,
+        prereqs: { type: "AND", courses: ["COP4813"] },
+        note: "Big data processing, relational data models, and predictive analytics."
+      }
+    ];
+
+    // State Tracking
+    const courseState = {}; // Stores course status: 'unlocked', 'completed', 'planned', or 'disabled-or'
+
+    // Initialize State
+    bsitProgramData.forEach(c => {
+      courseState[c.id] = 'unlocked';
+    });
+
+    // Requirement 2: Dynamic Creation of Interface Elements
+    function renderAdvisor() {
+      const listCompleted = document.getElementById('list-completed');
+      const listAvailable = document.getElementById('list-available');
+      const listPlanned = document.getElementById('list-planned');
+
+      listCompleted.innerHTML = '';
+      listAvailable.innerHTML = '';
+      listPlanned.innerHTML = '';
+
+      evaluatePrerequisites();
+
+      bsitProgramData.forEach(course => {
+        const status = courseState[course.id];
+        const card = createCourseCard(course, status);
+
+        if (status === 'completed') {
+          listCompleted.appendChild(card);
+        } else if (status === 'planned') {
+          listPlanned.appendChild(card);
+        } else {
+          listAvailable.appendChild(card);
+        }
+      });
+
+      updateCreditSummary();
+    }
+
+    // Factory Function to dynamically construct Course Card DOM elements
+    function createCourseCard(course, status) {
+      const card = document.createElement('div');
+      card.className = `course-card ${status}`;
+      card.id = `card-${course.id}`;
+      card.setAttribute('draggable', status !== 'disabled-or');
+      card.dataset.courseId = course.id;
+
+      // Card Header
+      const cardTop = document.createElement('div');
+      cardTop.className = 'card-top';
+
+      const codeEl = document.createElement('span');
+      codeEl.className = 'course-code';
+      codeEl.textContent = course.code;
+
+      const creditsEl = document.createElement('span');
+      creditsEl.className = 'course-credits';
+      creditsEl.textContent = `${course.credits} Cr`;
+
+      cardTop.appendChild(codeEl);
+      cardTop.appendChild(creditsEl);
+
+      // Card Title
+      const titleEl = document.createElement('div');
+      titleEl.className = 'course-title';
+      titleEl.textContent = course.title;
+
+      // Card Footer
+      const cardFooter = document.createElement('div');
+      cardFooter.className = 'card-footer';
+
+      const statusText = document.createElement('span');
+      if (status === 'disabled-or') {
+        statusText.textContent = 'Locked (OR Choice Taken)';
+        statusText.style.color = 'var(--red-locked)';
+      } else if (status === 'completed') {
+        statusText.textContent = 'Completed';
+        statusText.style.color = 'var(--accent-cyan)';
+      } else if (status === 'planned') {
+        statusText.textContent = 'Planned';
+        statusText.style.color = 'var(--gold-planned)';
+      } else {
+        const isEligible = checkCourseEligibility(course);
+        statusText.textContent = isEligible ? 'Eligible' : 'Prereqs Needed';
+        statusText.style.color = isEligible ? 'var(--green-available)' : 'var(--red-locked)';
+        if (!isEligible) card.classList.remove('available');
+        else card.classList.add('available');
+      }
+
+      const infoBtn = document.createElement('button');
+      infoBtn.className = 'info-btn';
+      infoBtn.innerHTML = '&#9439;'; // Info Icon
+      infoBtn.title = 'View Catalog Details';
+      
+      // Requirement 3: Respond to Events Triggered by Dynamically Generated Elements
+      infoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCourseModal(course);
+      });
+
+      cardFooter.appendChild(statusText);
+      cardFooter.appendChild(infoBtn);
+
+      card.appendChild(cardTop);
+      card.appendChild(titleEl);
+      card.appendChild(cardFooter);
+
+      // Drag Start Event Listener
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', course.id);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      return card;
+    }
+
+    // Business Logic: Prerequisite & AND/OR Rule Evaluation
+    function evaluatePrerequisites() {
+      // 1. Check OR Mutex Rule (e.g., COP2800 OR COP2001)
+      const completedIds = Object.keys(courseState).filter(id => courseState[id] === 'completed' || courseState[id] === 'planned');
+
+      bsitProgramData.forEach(course => {
+        if (course.orGroup) {
+          const sibling = bsitProgramData.find(c => c.orGroup === course.orGroup && c.id !== course.id);
+          if (sibling && (courseState[sibling.id] === 'completed' || courseState[sibling.id] === 'planned')) {
+            if (courseState[course.id] !== 'completed' && courseState[course.id] !== 'planned') {
+              courseState[course.id] = 'disabled-or';
+            }
+          } else if (courseState[course.id] === 'disabled-or') {
+            courseState[course.id] = 'unlocked';
+          }
+        }
+      });
+    }
+
+    function checkCourseEligibility(course) {
+      if (!course.prereqs || course.prereqs.length === 0) return true;
+
+      const completedIds = Object.keys(courseState).filter(id => courseState[id] === 'completed');
+
+      if (course.prereqs.type === 'AND') {
+        return course.prereqs.courses.every(req => completedIds.includes(req));
+      } else if (course.prereqs.type === 'OR') {
+        return course.prereqs.courses.some(req => completedIds.includes(req));
+      }
+      return true;
+    }
+
+    // Dynamic Credit Summary Counter
+    function updateCreditSummary() {
+      let completed = 0;
+      let planned = 0;
+      const total = bsitProgramData.reduce((acc, c) => acc + c.credits, 0);
+
+      bsitProgramData.forEach(course => {
+        if (courseState[course.id] === 'completed') completed += course.credits;
+        if (courseState[course.id] === 'planned') planned += course.credits;
+      });
+
+      document.getElementById('completedCredits').textContent = completed;
+      document.getElementById('plannedCredits').textContent = planned;
+      document.getElementById('remainingCredits').textContent = Math.max(0, total - completed - planned);
+    }
+
+    // Drag & Drop Column Target Listeners
+    const columns = document.querySelectorAll('.drop-column');
+
+    columns.forEach(col => {
+      col.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        col.classList.add('drag-over');
+      });
+
+      col.addEventListener('dragleave', () => {
+        col.classList.remove('drag-over');
+      });
+
+      col.addEventListener('drop', (e) => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        const courseId = e.dataTransfer.getData('text/plain');
+        const targetStatus = col.dataset.status;
+
+        const course = bsitProgramData.find(c => c.id === courseId);
+        
+        // Validation: Cannot plan/complete course if prerequisites are missing
+        if ((targetStatus === 'completed' || targetStatus === 'planned') && !checkCourseEligibility(course)) {
+          alert(`Cannot move ${course.code}: Prerequisites not satisfied!`);
+          return;
+        }
+
+        courseState[courseId] = targetStatus;
+        renderAdvisor();
+      });
+    });
+
+    // Dynamic Modal Popup Logic
+    const infoModal = document.getElementById('infoModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function openCourseModal(course) {
+      document.getElementById('modalTitle').textContent = `${course.code}: ${course.title}`;
+      
+      let prereqDesc = 'None';
+      if (course.prereqs && course.prereqs.courses) {
+        prereqDesc = `${course.prereqs.type} condition: ${course.prereqs.courses.join(', ')}`;
+      }
+
+      document.getElementById('modalBody').innerHTML = `
+        <p><strong>Credits:</strong> ${course.credits}</p>
+        <p><strong>Prerequisites:</strong> ${prereqDesc}</p>
+        <p><strong>Catalog Note:</strong> ${course.note}</p>
+      `;
+      infoModal.style.display = 'flex';
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+      infoModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === infoModal) infoModal.style.display = 'none';
+    });
+
+    // Initial Render
+    renderAdvisor();
+  </script>
+</body>
+</html>
