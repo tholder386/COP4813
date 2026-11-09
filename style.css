@@ -8,7 +8,7 @@ CSS
 
 /* Page Level Background - Purple Theme */
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
   line-height: 1.6;
   color: #211033;
   background-color: #2e1065; /* Dark Purple Page Background */
@@ -27,11 +27,14 @@ header {
 /* Navigation Menu */
 nav {
   background-color: #3b0764; /* Dark Accent Purple for Nav */
+  position: relative;
+  z-index: 1000;
 }
 
 nav ul {
   list-style: none;
   display: flex;
+  align-items: center;
 }
 
 nav ul li {
@@ -44,6 +47,7 @@ nav ul li a {
   color: #ffffff;
   text-decoration: none;
   font-weight: bold;
+  min-height: 44px; /* Accessible Touch Target */
 }
 
 nav ul li a:hover,
@@ -52,30 +56,90 @@ nav ul li a:focus {
   outline: none;
 }
 
-/* Dropdown Menu */
-nav ul li ul.dropdown {
+/* Dropdown Menu - Supporting both hover and click (.dropdown-menu / .active) */
+nav ul li ul.dropdown,
+nav ul li ul.dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
   left: 0;
   background-color: #4c1d95;
-  min-width: 200px;
-  z-index: 1000;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  min-width: 280px; /* Expanded for long assignment titles */
+  max-height: 75vh; /* Prevents 10+ items from overflowing off-screen */
+  overflow-y: auto;  /* Adds scrollbar if menu height exceeds viewport */
+  z-index: 2000;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  border-radius: 0 0 8px 8px;
+  border: 1px solid #7e22ce;
 }
 
+/* Hover & JS Toggle Rules */
 nav ul li:hover ul.dropdown,
-nav ul li:focus-within ul.dropdown {
+nav ul li:focus-within ul.dropdown,
+nav ul li.active ul.dropdown-menu,
+nav ul li ul.dropdown-menu.active {
   display: block;
 }
 
-nav ul li ul.dropdown li {
+nav ul li ul.dropdown li,
+nav ul li ul.dropdown-menu li {
   width: 100%;
 }
 
-nav ul li ul.dropdown a {
-  padding: 10px 15px;
+nav ul li ul.dropdown a,
+nav ul li ul.dropdown-menu a {
+  padding: 12px 20px;
   font-weight: normal;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(126, 34, 206, 0.3);
+}
+
+nav ul li ul.dropdown a:hover,
+nav ul li ul.dropdown-menu a:hover {
+  background-color: #7e22ce;
+  color: #ffffff;
+}
+
+/* Mobile Toggle Button (Hidden on Desktop) */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.8rem;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  nav ul.nav-menu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: #3b0764;
+  }
+
+  nav ul.nav-menu.active {
+    display: flex;
+  }
+
+  nav ul li {
+    width: 100%;
+  }
+
+  nav ul li ul.dropdown,
+  nav ul li ul.dropdown-menu {
+    position: static;
+    max-height: none;
+    box-shadow: none;
+    background-color: #211033;
+    padding-left: 15px;
+  }
 }
 
 /* Main Content Container */
@@ -83,7 +147,7 @@ main {
   background: #f3e8ff; /* Light Lavender Container for High Text Contrast */
   padding: 2rem;
   border-radius: 0 0 8px 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 section {
