@@ -1,0 +1,133 @@
+JSON
+[
+  {
+    "name": "WordPress",
+    "support": [
+      { "text": "Open Source (GPLv2)", "url": "https://wordpress.org/about/" },
+      { "text": "Supported by most hosting companies", "url": "https://wordpress.org/hosting/" }
+    ],
+    "technology": [
+      { "text": "PHP (Server-Side)", "url": "https://make.wordpress.org/hosting/handbook/server-environment/" },
+      { "text": "MySQL / MariaDB (Database Layer)", "url": "https://wordpress.org/about/requirements/" },
+      { "text": "HTML5, CSS3, JavaScript / React (Client Layer)", "url": "https://developer.wordpress.org/block-editor/" }
+    ],
+    "capabilities": [
+      { "text": "Supports thousands of themes", "url": "https://wordpress.org/themes/" },
+      { "text": "Supports 59,000+ plugins", "url": "https://wordpress.org/plugins/" },
+      { "text": "Public REST API & Gutenberg Block Editor", "url": "https://developer.wordpress.org/rest-api/" }
+    ],
+    "limitations": [
+      { "text": "Security vulnerabilities from third-party plugins", "url": "https://www.contentstack.com/blog/strategy/top-disadvantages-of-wordpress-what-you-need-to-know" },
+      { "text": "Frequent core/plugin updates can cause conflicts", "url": "https://wpoptic.com/blog/wordpress-tech-stack-guide/" },
+      { "text": "Page speed bloat when overloaded with plugins", "url": "https://www.contentstack.com/blog/strategy/top-disadvantages-of-wordpress-what-you-need-to-know" }
+    ],
+    "examples": [
+      { "text": "WordPress.org", "url": "https://wordpress.org/" },
+      { "text": "TechCrunch", "url": "https://techcrunch.com/" }
+    ]
+  },
+  {
+    "name": "Drupal",
+    "support": [
+      { "text": "Open Source (Drupal Association & Community)", "url": "https://www.drupal.org/about" },
+      { "text": "Enterprise vendor support (Acquia, Pantheon)", "url": "https://www.drupal.org/hosting" }
+    ],
+    "technology": [
+      { "text": "PHP / Symfony Framework (Server Layer)", "url": "https://www.drupal.org/docs/getting-started/system-requirements" },
+      { "text": "MySQL, MariaDB, PostgreSQL, SQLite (Database)", "url": "https://www.drupal.org/docs/getting-started/system-requirements/database-server-requirements" },
+      { "text": "Twig Templating, HTML5, CSS3, JS (Client Layer)", "url": "https://www.drupal.org/docs/getting-started/understanding-drupal/overview-of-drupal" }
+    ],
+    "capabilities": [
+      { "text": "Granular role-based access control & enterprise security", "url": "https://www.techtarget.com/news/The-pros-and-cons-of-Drupal/849277/" },
+      { "text": "Native multilingual and multi-site architecture", "url": "https://www.dexa.ag/blog/drupal-advantages-disadvantages" },
+      { "text": "Headless API-first support (JSON:API, REST, GraphQL)", "url": "https://www.dexa.ag/blog/drupal-advantages-disadvantages" }
+    ],
+    "limitations": [
+      { "text": "Steep learning curve for non-technical administrators", "url": "https://www.techtarget.com/news/The-pros-and-cons-of-Drupal/849277/" },
+      { "text": "Complex backend administrative UI", "url": "https://www.techtarget.com/news/The-pros-and-cons-of-Drupal/849277/" },
+      { "text": "Major version upgrades and module maintenance require developer expertise", "url": "https://www.dexa.ag/blog/drupal-advantages-disadvantages" }
+    ],
+    "examples": [
+      { "text": "NASA.gov", "url": "https://www.nasa.gov/" },
+      { "text": "Harvard University", "url": "https://www.harvard.edu/" }
+    ]
+  },
+  {
+    "name": "Joomla!",
+    "support": [
+      { "text": "Open Source (Open Source Matters, Inc.)", "url": "https://www.joomla.org/about-joomla.html" },
+      { "text": "Community forums and third-party hosting providers", "url": "https://forum.joomla.org/" }
+    ],
+    "technology": [
+      { "text": "PHP (Server Layer)", "url": "https://manual.joomla.org/docs/next/get-started/technical-requirements/" },
+      { "text": "MySQL, MariaDB, PostgreSQL (Database Layer)", "url": "https://manual.joomla.org/docs/next/get-started/technical-requirements/" },
+      { "text": "Bootstrap 5, HTML5, CSS3, JavaScript (Client Layer)", "url": "https://docs.joomla.org/Portal:Template_Development" }
+    ],
+    "capabilities": [
+      { "text": "Built-in multilingual support without extra plugins", "url": "https://www.joomla.org/core-features.html" },
+      { "text": "Flexible access control lists (ACL) and custom fields", "url": "https://www.joomla.org/core-features.html" },
+      { "text": "Built-in Web Services REST API for headless integration", "url": "https://magazine.joomla.org/issues/2026/march-2026/using-joomla-as-a-headless-cms" }
+    ],
+    "limitations": [
+      { "text": "Smaller extension and template marketplace than WordPress", "url": "https://www.informaticsinc.com/blog/2014/pros-and-cons-joomla-content-management-system" },
+      { "text": "Higher structural complexity for beginners", "url": "https://www.informaticsinc.com/blog/2014/pros-and-cons-joomla-content-management-system" },
+      { "text": "Some legacy extensions output HTML directly, complicating headless setups", "url": "https://magazine.joomla.org/issues/2026/march-2026/using-joomla-as-a-headless-cms" }
+    ],
+    "examples": [
+      { "text": "Joomla.org", "url": "https://www.joomla.org/" },
+      { "text": "Linux.com (Historical / Community Portals)", "url": "https://showcase.joomla.org/" }
+    ]
+  },
+  {
+    "name": "Ghost",
+    "support": [
+      { "text": "Open Source (MIT License) by non-profit Ghost Foundation", "url": "https://ghost.org/about/" },
+      { "text": "Managed SaaS hosting via Ghost(Pro)", "url": "https://ghost.org/pricing/" }
+    ],
+    "technology": [
+      { "text": "Node.js (Server Layer)", "url": "https://ghost.org/docs/tech-stack/" },
+      { "text": "MySQL 8 (Production Database) / SQLite3 (Dev)", "url": "https://xcloud.host/what-is-ghost-cms/" },
+      { "text": "Handlebars Templates, Ember.js Admin, REST Content API", "url": "https://kanopylabs.com/blog/ghost-vs-wordpress-vs-payload-cms-content-platforms" }
+    ],
+    "capabilities": [
+      { "text": "Native email newsletters, paid memberships, and Stripe integration", "url": "https://xcloud.host/what-is-ghost-cms/" },
+      { "text": "Lightweight, fast card-based Markdown/rich-text editor", "url": "https://kanopylabs.com/blog/ghost-vs-wordpress-vs-payload-cms-content-platforms" },
+      { "text": "Built-in SEO sitemaps, structured data, and headless Content API", "url": "https://xcloud.host/what-is-ghost-cms/" }
+    ],
+    "limitations": [
+      { "text": "No traditional plugin ecosystem; relies on webhooks and APIs", "url": "https://kanopylabs.com/blog/ghost-vs-wordpress-vs-payload-cms-content-platforms" },
+      { "text": "Focused strictly on publishing; lacks complex page builders or e-commerce", "url": "https://kanopylabs.com/blog/ghost-vs-wordpress-vs-payload-cms-content-platforms" },
+      { "text": "Self-hosting requires manual server, mail (Mailgun), and Node maintenance", "url": "https://xcloud.host/what-is-ghost-cms/" }
+    ],
+    "examples": [
+      { "text": "Ghost.org", "url": "https://ghost.org/" },
+      { "text": "Mozilla Blog", "url": "https://blog.mozilla.org/" }
+    ]
+  },
+  {
+    "name": "Shopify",
+    "support": [
+      { "text": "Proprietary SaaS (Supported & Hosted by Shopify Inc.)", "url": "https://www.shopify.com/about" },
+      { "text": "24/7 vendor support and managed cloud infrastructure", "url": "https://help.shopify.com/" }
+    ],
+    "technology": [
+      { "text": "Ruby on Rails & Go (Proprietary Cloud Backend)", "url": "https://shopify.engineering/" },
+      { "text": "MySQL / Cloud Managed Data Store (Database Layer)", "url": "https://shopify.engineering/" },
+      { "text": "Liquid Templating, HTML5, CSS3, React / Hydrogen (Client Layer)", "url": "https://gempages.net/blogs/shopify/shopify-cms" }
+    ],
+    "capabilities": [
+      { "text": "All-in-one e-commerce, inventory, and PCI-compliant checkout", "url": "https://www.shopify.com/blog/content-management-system" },
+      { "text": "Drag-and-drop Online Store 2.0 theme editor & App Store", "url": "https://gempages.net/blogs/shopify/shopify-cms" },
+      { "text": "Headless commerce via Storefront GraphQL API & Hydrogen", "url": "https://gempages.net/blogs/shopify/shopify-cms" }
+    ],
+    "limitations": [
+      { "text": "Closed-source; no direct server-side code or database access", "url": "https://medium.com/@ocontis/what-is-shopify-features-limitations-and-use-cases-for-growing-brands-0fbb9899c30c" },
+      { "text": "Recurring monthly subscription fees plus third-party app costs", "url": "https://medium.com/@ocontis/what-is-shopify-features-limitations-and-use-cases-for-growing-brands-0fbb9899c30c" },
+      { "text": "Restricted checkout customization unless on enterprise Shopify Plus", "url": "https://medium.com/@ocontis/what-is-shopify-features-limitations-and-use-cases-for-growing-brands-0fbb9899c30c" }
+    ],
+    "examples": [
+      { "text": "Shopify.com", "url": "https://www.shopify.com/" },
+      { "text": "Gymshark", "url": "https://www.gymshark.com/" }
+    ]
+  }
+]
