@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -302,36 +302,26 @@
     // =========================================================================
     // 16-BIT PIXEL ART SPRITE ENGINE (PUNCH-OUT!! STYLE)
     // =========================================================================
-    // Palette codes:
-    // . = transparent
-    // O = black outline (#0b0812)
-    // H = dark hair (#231712)
-    // S = skin base (#e0a370), s = skin shadow (#b57848)
-    // E = eye white (#ffffff), P = pupil (#0b0812)
-    // R = red gi main (#d62839), r = red gi dark fold (#8f1622), L = red gi highlight (#ff5964)
-    // B = black gi main (#262430), b = black gi shadow (#14131a), G = black gi highlight (#474359)
-    // K = black belt (#111116), T = red rank tip (#ff2a4b)
-    // W = gold telegraph flash (#ffd166)
-
     const PALETTE = {
-      O: '#0b0812',
-      H: '#231712',
-      S: '#e0a370',
-      s: '#b57848',
-      E: '#ffffff',
-      P: '#0b0812',
-      R: '#d62839',
-      r: '#8f1622',
-      L: '#ff5964',
-      B: '#282634',
-      b: '#14131a',
-      G: '#4b475e',
-      K: '#101015',
-      T: '#ff2a4b',
-      W: '#ffd166'
+      O: '#0b0812', // outline
+      H: '#231712', // hair
+      S: '#e0a370', // skin
+      s: '#b57848', // skin shadow
+      E: '#ffffff', // eye white
+      P: '#0b0812', // pupil
+      R: '#d62839', // red gi
+      r: '#8f1622', // red gi shadow
+      L: '#ff5964', // red gi highlight
+      B: '#282634', // black gi
+      b: '#14131a', // black gi shadow
+      G: '#4b475e', // black gi highlight
+      K: '#101015', // black belt
+      T: '#ff2a4b', // rank bar
+      W: '#ffd166', // gold highlight
+      C: '#00f5d4'  // cyan kinetic highlight
     };
 
-    // 1. Opponent Standing Fighting Stance (Red Gi, 22x28)
+    // Base Positional Sprites
     const SPRITE_OPP_STANDING = [
       '.......OOOOOOOO.......',
       '......OHHHHHHHHO......',
@@ -361,7 +351,6 @@
       '..OOOOOO......OOOOOO..'
     ];
 
-    // 2. Opponent Pinned Beneath Player (Top Mount / Top Half - Red Gi, 28x18)
     const SPRITE_OPP_PINNED = [
       '..........OOOOOOOO..........',
       '.........OHHHHHHHHO.........',
@@ -381,7 +370,6 @@
       '..OOOOOO..........OOOOOO....'
     ];
 
-    // 3. Opponent Back Exposed (Back Control - Red Gi facing away, 22x26)
     const SPRITE_OPP_BACK = [
       '.......OOOOOOOO.......',
       '......OHHHHHHHHO......',
@@ -406,7 +394,6 @@
       '....OOOOO....OOOOO....'
     ];
 
-    // 4. Opponent Postured Over Player (Bottom Full / Half Guard - Red Gi, 24x26)
     const SPRITE_OPP_OVER = [
       '........OOOOOOOO........',
       '.......OHHHHHHHHO.......',
@@ -430,7 +417,6 @@
       '...OOOOO........OOOOO...'
     ];
 
-    // 5. Player Over-the-Shoulder Foreground Sprite (Black Gi, 46x15)
     const SPRITE_PLAYER_FOREGROUND = [
       '....OOOOOO..........................OOOOOO....',
       '...OSSSSSSO........................OSSSSSSO...',
@@ -447,6 +433,111 @@
       'OBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBO',
       'OBbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbBO',
       'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
+    ];
+
+    // =========================================================================
+    // DEDICATED TRANSITION & SUBMISSION ACTION SPRITES
+    // =========================================================================
+
+    // Clinch / Takedown Drive (Black Gi shooting low into Red Gi)
+    const SPRITE_ANIM_CLINCH = [
+      '..........OOOOOOOO..........',
+      '.........OHHHHHHHHO.........',
+      '.........OSSSSSSSSO.........',
+      '.........OSEPOOPESs.........',
+      '....OOOOOORRRRRRRROOOOOO....',
+      '..OORRRRRRLRssRLRRRRRRRROO..',
+      '.ORRrRRRRRRRRRRRRRRRRRRrRRO.',
+      '..OOBBBBBBBBBBBBBBBBBBBBOO..',
+      '.OBBGBBBBBBBBBBBBBBBBBBGBBO.',
+      'OBBBBBBBKKKKKKKKKKKKBBBBBBBO',
+      'OBbBBBBBBBBBBBBBBBBBBBBBBbBO',
+      '.OOOOOOOOOOOOOOOOOOOOOOOOOO.'
+    ];
+
+    // Sweep / Guard Pass Scramble (Dynamic diagonal roll)
+    const SPRITE_ANIM_SCRAMBLE = [
+      '......OOOOOOOO..............',
+      '.....OHHHHHHHHO.............',
+      '.....OSSSSSSSSO.............',
+      '....OORRRRRRRROO....OOOOOO..',
+      '...ORRrRRRRRRrRRO..OBBBBBBO.',
+      '..OORRRRRRRRRRRROOOBBGBBBBBO',
+      '.OBBBBBBBBBBBBBBBBBBBbBBBBBO',
+      'OBBGBBBBBKKKKKKKKKKBBBBBBBBO',
+      'OBbBBBBBBBBBBBBBBBBBBBBBBbBO',
+      '.OOOOOOOOOOOOOOOOOOOOOOOOOO.'
+    ];
+
+    // Armbar (Player black gi legs across Red gi chest/head, hyperextending arm)
+    const SPRITE_ANIM_ARMBAR = [
+      '.............OOOOOOOO...........',
+      '............OHHHHHHHHO..........',
+      '............OSSSSSSSSO..........',
+      '............OSWPOOPESs..........',
+      '......OOOOOORRRRRRRRRROOOOO.....',
+      '....OORRRRRRRRRRRRRRRRRRRROO....',
+      '..OOBBBBBBBBBBOSSSSOOBBBBBBOO...',
+      '.OBBGBBBBBBBBBOSSSSOOBBBBBGBBO..',
+      'OBBBBBBBBBBBBBOSSSSOOBBBBBBBBBO.',
+      'OBbBBBBBBBBBBBOOOOOOOBBBBBBBbBO.',
+      '.OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO.'
+    ];
+
+    // Guillotine (Black gi front headlock wrapping Red gi neck)
+    const SPRITE_ANIM_GUILLOTINE = [
+      '.......OOOOOOOOOOOOOO.......',
+      '.....OOBBBBBBBBBBBBBBOO.....',
+      '....OBBGBBBBBBBBBBBBGBBO....',
+      '....OBBBBBBOOOOOOOBBBBBO....',
+      '....OBBBBBOSSSSSSOOBBBBO....',
+      '.....OOBBBOOSWPOOSOBBOO.....',
+      '......OOOOOORRRRROOOOO......',
+      '....OORRRRRRRRRRRRRRROO.....',
+      '...ORRrRRRRRRRRRRRRRrRRO....',
+      '....OOOOOOOOOOOOOOOOOO......'
+    ];
+
+    // Rear Naked Choke (Black gi behind Red gi with figure-four choke around neck)
+    const SPRITE_ANIM_RNC = [
+      '.......OOOOOOOOOOOOOO.......',
+      '......OHHHHHHHHHHHHHHO......',
+      '.....OHHHHHHHHHHHHHHHHO.....',
+      '.....OHSSSSSSSSSSSSSSHO.....',
+      '.....OOSWPOOOOOOOOPESsO.....',
+      '....OOBBBBBBBBBBBBBBBBOO....',
+      '...OBBGBBBBBBBBBBBBBBGBBO...',
+      '..OBBBBBBRRRRRRRRRRBBBBBBO..',
+      '.OBbBBBBBRRrRRRRrRRBBBBBbBO.',
+      '..OOOOOOOOOOOOOOOOOOOOOOOO..'
+    ];
+
+    // Kimura / Americana (Figure-four shoulder lock isolating Red gi arm)
+    const SPRITE_ANIM_SHOULDERLOCK = [
+      '..........OOOOOOOO..........',
+      '.........OHHHHHHHHO.........',
+      '.........OSSSSSSSSO.........',
+      '.........OSWPOOPESs.........',
+      '....OOOOOORRRRRRRROOOOOO....',
+      '..OORRRRRRRRRRRRRRRRRRRROO..',
+      '.ORRrRRRRROOOOOOOORRRRRrRRO.',
+      '..OOOOOOOBBBBBBBBBBOOOOOOO..',
+      '.......OBBGBBBBBBBGBBO......',
+      '......OBBBBBBBBBBBBBBBO.....',
+      '.......OOOOOOOOOOOOOOO......'
+    ];
+
+    // Toe Hold (Figure-four ankle twist on Red gi leg)
+    const SPRITE_ANIM_TOEHOLD = [
+      '.......OOOOOO....OOOOOO.....',
+      '......ORRRRRO....ORRRRRO....',
+      '.....ORRrRRRO....ORRrRRRO...',
+      '.....ORRRRRO......ORRRRRO...',
+      '....OSSSSSO........OSSSSSO..',
+      '...OOBBBBBBOOOOOOOOBBBBBBOO.',
+      '..OBBGBBBBBBBBBBBBBBBBBBGBBO',
+      '.OBBBBBBBKKKKKKKKKKKKBBBBBBBO',
+      '..OOOOOOOOOOOOOOOOOOOOOOOOOO.'
     ];
 
     function drawPixelSprite(spriteRows, centerX, centerY, pixelSize, flashTelegraph = false) {
@@ -481,7 +572,7 @@
         name: 'STANDING (NEUTRAL)',
         perspective: 'Both fighters on feet. Establish grips to initiate takedown.',
         transitions: [
-          { id: 'clinch', label: 'Engage Clinch & Takedown', staminaCost: 10 }
+          { id: 'clinch', label: 'Engage Clinch & Takedown', staminaCost: 10, animType: 'CLINCH' }
         ],
         submissions: []
       },
@@ -489,61 +580,61 @@
         name: 'TOP HALF GUARD',
         perspective: 'You are on top; opponent has one of your legs trapped.',
         transitions: [
-          { id: 'pass_mount', label: 'Knee-Cut Pass to Mount (+3)', staminaCost: 18, target: 'TOP_MOUNT', pts: 3, dmg: 22 },
-          { id: 'pressure', label: 'Crossface Pressure', staminaCost: 10, dmg: 16 }
+          { id: 'pass_mount', label: 'Knee-Cut Pass to Mount (+3)', staminaCost: 18, target: 'TOP_MOUNT', pts: 3, dmg: 22, animType: 'PASS' },
+          { id: 'pressure', label: 'Crossface Pressure', staminaCost: 10, dmg: 16, animType: 'PRESSURE' }
         ],
         submissions: [
-          { id: 'kimura', label: 'Kimura', minPosture: 45, desc: 'Isolated the far arm with a figure-four grip from top half guard.' },
-          { id: 'toehold', label: 'Toe Hold', minPosture: 45, desc: 'Backstepped on the trapped leg to apply rotational pressure to the ankle.' }
+          { id: 'kimura', label: 'Kimura', minPosture: 45, animType: 'SHOULDERLOCK', desc: 'Isolated the far arm with a figure-four grip from top half guard.' },
+          { id: 'toehold', label: 'Toe Hold', minPosture: 45, animType: 'TOEHOLD', desc: 'Backstepped on the trapped leg to apply rotational pressure to the ankle.' }
         ]
       },
       TOP_MOUNT: {
         name: 'TOP MOUNT',
         perspective: 'Dominant pin! Seated on opponent’s torso with high control.',
         transitions: [
-          { id: 'take_back', label: 'Gift-Wrap Back Take (+4)', staminaCost: 16, target: 'BACK_CONTROL', pts: 4, dmg: 20 },
-          { id: 'smother', label: 'High Mount & Smother', staminaCost: 12, dmg: 20 }
+          { id: 'take_back', label: 'Gift-Wrap Back Take (+4)', staminaCost: 16, target: 'BACK_CONTROL', pts: 4, dmg: 20, animType: 'BACK_TAKE' },
+          { id: 'smother', label: 'High Mount & Smother', staminaCost: 12, dmg: 20, animType: 'PRESSURE' }
         ],
         submissions: [
-          { id: 'armbar', label: 'Armbar', minPosture: 45, desc: 'S-mount transition into a classic hyperextension armbar from mount.' },
-          { id: 'americana', label: 'Americana', minPosture: 45, desc: 'Pinned the wrist to the mat in a figure-four keylock from top mount.' },
-          { id: 'guillotine', label: 'Mounted Guillotine', minPosture: 45, desc: 'Wrapped the neck as the opponent tried to bridge and turtle out.' }
+          { id: 'armbar', label: 'Armbar', minPosture: 45, animType: 'ARMBAR', desc: 'S-mount transition into a classic hyperextension armbar from mount.' },
+          { id: 'americana', label: 'Americana', minPosture: 45, animType: 'SHOULDERLOCK', desc: 'Pinned the wrist to the mat in a figure-four keylock from top mount.' },
+          { id: 'guillotine', label: 'Mounted Guillotine', minPosture: 45, animType: 'GUILLOTINE', desc: 'Wrapped the neck as the opponent tried to bridge and turtle out.' }
         ]
       },
       BACK_CONTROL: {
         name: 'BACK CONTROL (HOOKS IN)',
         perspective: 'Checkmate position! Both hooks inserted with seatbelt control behind opponent.',
         transitions: [
-          { id: 'hand_fight', label: 'Trap Wrist & Isolate Neck', staminaCost: 10, dmg: 22 }
+          { id: 'hand_fight', label: 'Trap Wrist & Isolate Neck', staminaCost: 10, dmg: 22, animType: 'PRESSURE' }
         ],
         submissions: [
-          { id: 'rnc', label: 'Rear Naked Choke', minPosture: 45, desc: 'Slid the choking arm under the chin with a figure-four lock behind the head from Back Control.' }
+          { id: 'rnc', label: 'Rear Naked Choke', minPosture: 45, animType: 'RNC', desc: 'Slid the choking arm under the chin with a figure-four lock behind the head from Back Control.' }
         ]
       },
       BOTTOM_FULL: {
         name: 'BOTTOM FULL GUARD',
         perspective: 'You are on your back with legs wrapped around opponent’s waist.',
         transitions: [
-          { id: 'hip_bump', label: 'Hip Bump Sweep to Mount (+2)', staminaCost: 18, target: 'TOP_MOUNT', pts: 2, dmg: 20 },
-          { id: 'scissor_sweep', label: 'Scissor Sweep to Top Half (+2)', staminaCost: 15, target: 'TOP_HALF', pts: 2, dmg: 16 },
-          { id: 'break_posture', label: 'Collar Drag / Break Posture', staminaCost: 10, dmg: 15 }
+          { id: 'hip_bump', label: 'Hip Bump Sweep to Mount (+2)', staminaCost: 18, target: 'TOP_MOUNT', pts: 2, dmg: 20, animType: 'SWEEP' },
+          { id: 'scissor_sweep', label: 'Scissor Sweep to Top Half (+2)', staminaCost: 15, target: 'TOP_HALF', pts: 2, dmg: 16, animType: 'SWEEP' },
+          { id: 'break_posture', label: 'Collar Drag / Break Posture', staminaCost: 10, dmg: 15, animType: 'PRESSURE' }
         ],
         submissions: [
-          { id: 'armbar', label: 'Armbar', minPosture: 45, desc: 'Pivoted hips perpendicular and threw leg over the head from closed guard.' },
-          { id: 'guillotine', label: 'Guillotine', minPosture: 45, desc: 'Snapped opponent’s head down and closed guard to finish the choke.' },
-          { id: 'kimura', label: 'Kimura', minPosture: 45, desc: 'Sat up with a figure-four shoulder lock from closed guard.' }
+          { id: 'armbar', label: 'Armbar', minPosture: 45, animType: 'ARMBAR', desc: 'Pivoted hips perpendicular and threw leg over the head from closed guard.' },
+          { id: 'guillotine', label: 'Guillotine', minPosture: 45, animType: 'GUILLOTINE', desc: 'Snapped opponent’s head down and closed guard to finish the choke.' },
+          { id: 'kimura', label: 'Kimura', minPosture: 45, animType: 'SHOULDERLOCK', desc: 'Sat up with a figure-four shoulder lock from closed guard.' }
         ]
       },
       BOTTOM_HALF: {
         name: 'BOTTOM HALF GUARD',
         perspective: 'You are on bottom trapping one leg. Fight for the underhook!',
         transitions: [
-          { id: 'dogfight', label: 'Underhook Sweep to Top Half (+2)', staminaCost: 18, target: 'TOP_HALF', pts: 2, dmg: 18 },
-          { id: 'recover_guard', label: 'Shrimp to Full Guard', staminaCost: 12, target: 'BOTTOM_FULL', pts: 0, dmg: 10 }
+          { id: 'dogfight', label: 'Underhook Sweep to Top Half (+2)', staminaCost: 18, target: 'TOP_HALF', pts: 2, dmg: 18, animType: 'SWEEP' },
+          { id: 'recover_guard', label: 'Shrimp to Full Guard', staminaCost: 12, target: 'BOTTOM_FULL', pts: 0, dmg: 10, animType: 'SHRIMP' }
         ],
         submissions: [
-          { id: 'kimura', label: 'Kimura', minPosture: 45, desc: 'Caught the overhooking arm in a figure-four lock from bottom half guard.' },
-          { id: 'toehold', label: 'Toe Hold', minPosture: 45, desc: 'Entangled the secondary leg underneath to finish a sneaky toe hold.' }
+          { id: 'kimura', label: 'Kimura', minPosture: 45, animType: 'SHOULDERLOCK', desc: 'Caught the overhooking arm in a figure-four lock from bottom half guard.' },
+          { id: 'toehold', label: 'Toe Hold', minPosture: 45, animType: 'TOEHOLD', desc: 'Entangled the secondary leg underneath to finish a sneaky toe hold.' }
         ]
       }
     };
@@ -567,7 +658,7 @@
         flashTimer: 0,
         shakeTimer: 0,
         animTime: 0,
-        playerPunchAnim: 0
+        activeAnim: null // { type, label, timer, maxTimer, isSub, onComplete }
       };
       lastRenderSignature = '';
       updateHUD();
@@ -581,13 +672,24 @@
 
     function triggerFlash(msg, shake = false) {
       state.flashMsg = msg;
-      state.flashTimer = 1.4;
-      state.playerPunchAnim = 0.25;
+      state.flashTimer = 1.5;
       if (shake) state.shakeTimer = 0.25;
     }
 
+    function playActionAnimation(type, label, duration, isSub = false, onComplete = null) {
+      state.activeAnim = {
+        type,
+        label,
+        timer: duration,
+        maxTimer: duration,
+        isSub,
+        onComplete
+      };
+      renderControls(true);
+    }
+
     function handleTransition(t) {
-      if (state.gameOver) return;
+      if (state.gameOver || state.activeAnim) return;
       state.attempts++;
 
       if (state.playerStamina < t.staminaCost) {
@@ -600,52 +702,59 @@
 
       state.playerStamina = Math.max(0, state.playerStamina - t.staminaCost);
 
+      // Clinch & Takedown Sequence
       if (t.id === 'clinch') {
-        const roll = Math.random();
-        state.successes++;
-        if (roll >= 0.45) {
-          state.pos = 'TOP_HALF';
-          state.points += 2;
-          state.oppPosture = Math.max(20, state.oppPosture - 20);
-          triggerFlash('TAKEDOWN LANDED! (+2 PTS)', true);
-          setTip('Nice single-leg takedown! You landed in Top Half Guard. Pass to Mount or attack a Kimura/Toe Hold.');
-        } else {
-          state.pos = 'BOTTOM_FULL';
-          state.oppPosture = Math.max(20, state.oppPosture - 10);
-          triggerFlash('PULLED FULL GUARD!', true);
-          setTip('Opponent stuffed the shot, so you pulled Bottom Full Guard. Break their posture or hit a sweep!');
-        }
-        state.telegraph = null;
-        state.oppCooldown = 2.8;
-        updateHUD();
-        renderControls(true);
+        playActionAnimation('CLINCH', 'CLINCH & TAKEDOWN DRIVE!', 1.15, false, () => {
+          const roll = Math.random();
+          state.successes++;
+          if (roll >= 0.45) {
+            state.pos = 'TOP_HALF';
+            state.points += 2;
+            state.oppPosture = Math.max(20, state.oppPosture - 20);
+            triggerFlash('TAKEDOWN LANDED! (+2 PTS)', true);
+            setTip('Nice single-leg takedown! You landed in Top Half Guard. Pass to Mount or attack a Kimura/Toe Hold.');
+          } else {
+            state.pos = 'BOTTOM_FULL';
+            state.oppPosture = Math.max(20, state.oppPosture - 10);
+            triggerFlash('PULLED FULL GUARD!', true);
+            setTip('Opponent stuffed the shot, so you pulled Bottom Full Guard. Break their posture or hit a sweep!');
+          }
+          state.telegraph = null;
+          state.oppCooldown = 2.8;
+          updateHUD();
+          renderControls(true);
+        });
         return;
       }
 
+      // Standard Positional Transition or Posture Break Sequence
       const successChance = 0.85 - (state.oppPosture * 0.002);
-      if (Math.random() <= successChance) {
-        state.successes++;
-        state.oppPosture = Math.max(10, state.oppPosture - (t.dmg || 15));
-        if (t.target) {
-          state.pos = t.target;
-          state.points += (t.pts || 0);
-          triggerFlash(`${t.label.toUpperCase()}!`, true);
-          setTip(POSITIONS[state.pos].perspective);
-        } else {
-          triggerFlash('POSTURE BROKEN!', true);
-          setTip(`Opponent posture dropped to ${Math.round(state.oppPosture)}%. Submissions unlock below 45%!`);
-        }
-      } else {
-        triggerFlash('STUFFED BY OPPONENT!', true);
-        setTip('Opponent defended the transition. Break their posture first or wait to counter their attack!');
-      }
+      const succeeded = Math.random() <= successChance;
 
-      updateHUD();
-      renderControls(true);
+      playActionAnimation(t.animType || 'SCRAMBLE', `${t.label.toUpperCase()}...`, 1.05, false, () => {
+        if (succeeded) {
+          state.successes++;
+          state.oppPosture = Math.max(10, state.oppPosture - (t.dmg || 15));
+          if (t.target) {
+            state.pos = t.target;
+            state.points += (t.pts || 0);
+            triggerFlash(`${t.label.toUpperCase()}!`, true);
+            setTip(POSITIONS[state.pos].perspective);
+          } else {
+            triggerFlash('POSTURE BROKEN!', true);
+            setTip(`Opponent posture dropped to ${Math.round(state.oppPosture)}%. Submissions unlock below 45%!`);
+          }
+        } else {
+          triggerFlash('STUFFED BY OPPONENT!', true);
+          setTip('Opponent defended the transition. Break their posture first or wait to counter their attack!');
+        }
+        updateHUD();
+        renderControls(true);
+      });
     }
 
     function handleSubmission(sub) {
-      if (state.gameOver) return;
+      if (state.gameOver || state.activeAnim) return;
       state.attempts++;
 
       if (state.oppPosture > sub.minPosture) {
@@ -655,41 +764,47 @@
       }
 
       const finishProb = Math.min(0.95, 0.55 + ((45 - state.oppPosture) * 0.012));
-      if (Math.random() <= finishProb) {
-        state.successes++;
-        endMatch(true, sub);
-      } else {
-        state.playerStamina = Math.max(5, state.playerStamina - 20);
-        state.oppPosture = Math.min(100, state.oppPosture + 25);
-        triggerFlash('ESCAPED! OPPONENT POSTURED UP!', true);
-        setTip(`They slipped out of the ${sub.label}! Rebuild control and break their posture again.`);
-        updateHUD();
-        renderControls(true);
-      }
+      const lockedIn = Math.random() <= finishProb;
+
+      playActionAnimation(sub.animType, `LOCKING IN ${sub.label.toUpperCase()}!`, 1.65, true, () => {
+        if (lockedIn) {
+          state.successes++;
+          endMatch(true, sub);
+        } else {
+          state.playerStamina = Math.max(5, state.playerStamina - 20);
+          state.oppPosture = Math.min(100, state.oppPosture + 25);
+          triggerFlash('ESCAPED! OPPONENT POSTURED UP!', true);
+          setTip(`They slipped out of the ${sub.label}! Rebuild control and break their posture again.`);
+          updateHUD();
+          renderControls(true);
+        }
+      });
     }
 
     function handleCounter() {
-      if (!state.telegraph || state.gameOver) return;
+      if (!state.telegraph || state.gameOver || state.activeAnim) return;
       state.attempts++;
       state.successes++;
 
       const newPos = state.telegraph.counterTarget;
       const bonusPts = newPos === 'BACK_CONTROL' ? 4 : 2;
-      state.pos = newPos;
-      state.points += bonusPts;
-      state.oppPosture = Math.max(15, state.oppPosture - 25);
-      state.playerStamina = Math.min(100, state.playerStamina + 15);
       state.telegraph = null;
       state.oppCooldown = 3.2;
 
-      triggerFlash(`PERFECT REVERSAL COUNTER! (+${bonusPts} PTS)`, true);
-      setTip(`Great timing! You countered their telegraph and transitioned directly into ${POSITIONS[newPos].name}.`);
-      updateHUD();
-      renderControls(true);
+      playActionAnimation(newPos === 'BACK_CONTROL' ? 'BACK_TAKE' : 'SWEEP', 'COUNTER REVERSAL!', 1.0, false, () => {
+        state.pos = newPos;
+        state.points += bonusPts;
+        state.oppPosture = Math.max(15, state.oppPosture - 25);
+        state.playerStamina = Math.min(100, state.playerStamina + 15);
+        triggerFlash(`PERFECT REVERSAL COUNTER! (+${bonusPts} PTS)`, true);
+        setTip(`Great timing! You countered their telegraph and transitioned directly into ${POSITIONS[newPos].name}.`);
+        updateHUD();
+        renderControls(true);
+      });
     }
 
     function spawnOpponentTelegraph() {
-      if (state.pos === 'STANDING') return;
+      if (state.pos === 'STANDING' || state.activeAnim) return;
 
       const attacks = {
         TOP_HALF: {
@@ -785,7 +900,8 @@
 
     function renderControls(force = false) {
       const subReady = state.oppPosture <= 45;
-      const sig = `${state.pos}|${Boolean(state.telegraph)}|${subReady}|${state.gameOver}`;
+      const busy = Boolean(state.activeAnim);
+      const sig = `${state.pos}|${Boolean(state.telegraph)}|${subReady}|${state.gameOver}|${busy}`;
       if (!force && sig === lastRenderSignature) return;
       lastRenderSignature = sig;
 
@@ -793,7 +909,7 @@
       const transDiv = document.getElementById('transitionControls');
       transDiv.innerHTML = '';
 
-      if (state.telegraph) {
+      if (state.telegraph && !busy) {
         const cBtn = document.createElement('button');
         cBtn.type = 'button';
         cBtn.className = 'counter-btn';
@@ -806,7 +922,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = `${t.label} (-${t.staminaCost} Stam)`;
-        btn.disabled = state.gameOver || Boolean(state.telegraph);
+        btn.disabled = state.gameOver || Boolean(state.telegraph) || busy;
         btn.onclick = () => handleTransition(t);
         transDiv.appendChild(btn);
       });
@@ -822,7 +938,7 @@
           btn.className = 'sub-btn';
           const ready = state.oppPosture <= sub.minPosture;
           btn.textContent = ready ? `🔒 ${sub.label} (READY)` : `${sub.label} (Need <${sub.minPosture}% Posture)`;
-          btn.disabled = state.gameOver || !ready || Boolean(state.telegraph);
+          btn.disabled = state.gameOver || !ready || Boolean(state.telegraph) || busy;
           btn.onclick = () => handleSubmission(sub);
           subDiv.appendChild(btn);
         });
@@ -830,13 +946,25 @@
     }
 
     // =========================================================================
-    // RETRO ARCADE ARENA & SPRITE RENDERING
+    // RETRO ARCADE ARENA & MULTI-STAGE ACTION ANIMATION RENDERER
     // =========================================================================
+    function drawSpeedLines(color = 'rgba(0, 245, 212, 0.35)') {
+      ctx.fillStyle = color;
+      for (let i = 0; i < 12; i++) {
+        const y = 135 + ((i * 23 + Math.floor(state.animTime * 240)) % 190);
+        const w = 60 + ((i * 37) % 120);
+        const x = (i % 2 === 0) ? 140 : (660 - w);
+        ctx.fillRect(x, y, w, 4);
+      }
+    }
+
     function drawArena() {
       ctx.save();
-      if (state.shakeTimer > 0) {
-        const dx = Math.round((Math.random() - 0.5) * 10);
-        const dy = Math.round((Math.random() - 0.5) * 10);
+      const activeShake = state.shakeTimer > 0 || (state.activeAnim && state.activeAnim.isSub);
+      if (activeShake) {
+        const amp = (state.activeAnim && state.activeAnim.isSub) ? 6 : 10;
+        const dx = Math.round((Math.random() - 0.5) * amp);
+        const dy = Math.round((Math.random() - 0.5) * amp);
         ctx.translate(dx, dy);
       }
 
@@ -844,7 +972,6 @@
       ctx.fillStyle = '#0d0817';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Pixel Crowd Rows
       ctx.fillStyle = '#1b1130';
       for (let x = 0; x < canvas.width; x += 24) {
         const hOffset = ((x * 7) % 12);
@@ -856,7 +983,7 @@
         ctx.fillRect(x, 96 + hOffset, 22, 36);
       }
 
-      // 2. Tatami Mat Perspective Floor (Stepped Pixel Style)
+      // 2. Tatami Mat Perspective Floor
       ctx.fillStyle = '#2d1b4e';
       ctx.beginPath();
       ctx.moveTo(110, 128);
@@ -866,61 +993,155 @@
       ctx.closePath();
       ctx.fill();
 
-      // Mat Tatami Grid Lines
       ctx.strokeStyle = '#3f266e';
       ctx.lineWidth = 3;
       ctx.strokeRect(165, 152, 470, 185);
-      // Red/Gold Competition Out-of-Bounds Warning Border
       ctx.strokeStyle = '#a82039';
       ctx.lineWidth = 4;
       ctx.strokeRect(185, 166, 430, 156);
 
-      // 3. Opponent Sprite (Red Gi) with Idle Bob & Telegraph Flash
-      const idleBob = Math.round(Math.sin(state.animTime * 5) * 3);
-      const isTelegraphing = Boolean(state.telegraph);
-      const flashFrame = isTelegraphing && (Math.floor(state.animTime * 14) % 2 === 0);
+      // 3. Render Either Active Transition/Submission Animation OR Idle Positional Stance
+      if (state.activeAnim) {
+        const anim = state.activeAnim;
+        const progress = 1 - (anim.timer / anim.maxTimer); // 0 -> 1
+        const pulseStep = Math.floor(state.animTime * 16) % 2;
 
-      let oppSprite = SPRITE_OPP_STANDING;
-      let oppY = 200 + idleBob;
-      let oppScale = 6;
+        drawSpeedLines(anim.isSub ? 'rgba(255, 209, 102, 0.35)' : 'rgba(0, 245, 212, 0.35)');
 
-      if (state.pos === 'STANDING') {
-        oppSprite = SPRITE_OPP_STANDING;
-        oppY = 198 + idleBob;
-        oppScale = 6;
-      } else if (state.pos === 'BACK_CONTROL') {
-        oppSprite = SPRITE_OPP_BACK;
-        oppY = 212 + idleBob;
-        oppScale = 6;
-      } else if (state.pos.startsWith('TOP_')) {
-        oppSprite = SPRITE_OPP_PINNED;
-        oppY = 232 + Math.round(idleBob * 0.5);
-        oppScale = 6;
+        // Shadow under grappling pair
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        ctx.fillRect(280, 278, 240, 16);
+
+        let actionSprite = SPRITE_ANIM_SCRAMBLE;
+        let offsetX = 0;
+        let offsetY = 0;
+        let scale = 7;
+
+        switch (anim.type) {
+          case 'CLINCH':
+            actionSprite = SPRITE_ANIM_CLINCH;
+            offsetY = Math.round(progress * 38); // Driving takedown down to mat
+            offsetX = pulseStep === 0 ? -8 : 8;
+            break;
+          case 'PASS':
+            actionSprite = SPRITE_ANIM_SCRAMBLE;
+            offsetX = Math.round(Math.sin(progress * Math.PI) * 75); // Lateral knee-cut slice
+            offsetY = 12;
+            break;
+          case 'SWEEP':
+            actionSprite = SPRITE_ANIM_SCRAMBLE;
+            offsetX = Math.round(Math.cos(progress * Math.PI) * 85); // Rolling sweep reversal
+            offsetY = Math.round(-Math.sin(progress * Math.PI) * 28);
+            break;
+          case 'SHRIMP':
+            actionSprite = SPRITE_ANIM_SCRAMBLE;
+            offsetX = Math.round(-Math.sin(progress * Math.PI) * 70); // Hip escape out
+            offsetY = 18;
+            break;
+          case 'BACK_TAKE':
+            actionSprite = SPRITE_ANIM_RNC;
+            offsetX = Math.round((1 - progress) * 65);
+            offsetY = 6;
+            break;
+          case 'PRESSURE':
+            actionSprite = SPRITE_OPP_PINNED;
+            offsetY = pulseStep === 0 ? 18 : 26;
+            break;
+          case 'ARMBAR':
+            actionSprite = SPRITE_ANIM_ARMBAR;
+            offsetY = 14 + (pulseStep * 4);
+            scale = 7;
+            break;
+          case 'GUILLOTINE':
+            actionSprite = SPRITE_ANIM_GUILLOTINE;
+            offsetY = 10 + (pulseStep * 4);
+            scale = 7;
+            break;
+          case 'RNC':
+            actionSprite = SPRITE_ANIM_RNC;
+            offsetY = 8 + (pulseStep * 4);
+            scale = 7;
+            break;
+          case 'SHOULDERLOCK':
+            actionSprite = SPRITE_ANIM_SHOULDERLOCK;
+            offsetY = 14 + (pulseStep * 4);
+            scale = 7;
+            break;
+          case 'TOEHOLD':
+            actionSprite = SPRITE_ANIM_TOEHOLD;
+            offsetY = 16 + (pulseStep * 4);
+            scale = 7;
+            break;
+        }
+
+        drawPixelSprite(actionSprite, 400 + offsetX, 224 + offsetY, scale, false);
+
+        // Action Banner & Submission Crank Meter
+        ctx.fillStyle = '#0b0812';
+        ctx.fillRect(210, 88, 380, 32);
+        ctx.strokeStyle = anim.isSub ? '#ffd166' : '#00f5d4';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(210, 88, 380, 32);
+
+        ctx.fillStyle = anim.isSub ? '#ffd166' : '#00f5d4';
+        ctx.font = 'bold 16px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(anim.label, 400, 109);
+
+        if (anim.isSub) {
+          // Animated Submission Torque Bar
+          ctx.fillStyle = '#140d22';
+          ctx.fillRect(260, 126, 280, 14);
+          ctx.fillStyle = pulseStep === 0 ? '#ff2a4b' : '#ffd166';
+          ctx.fillRect(262, 128, Math.round(276 * progress), 10);
+          ctx.strokeStyle = '#ffffff';
+          ctx.strokeRect(260, 126, 280, 14);
+        }
       } else {
-        // BOTTOM_FULL or BOTTOM_HALF (Opponent towering over player)
-        oppSprite = SPRITE_OPP_OVER;
-        oppY = 196 + idleBob;
-        oppScale = 7;
+        // Idle Positional Sprites
+        const idleBob = Math.round(Math.sin(state.animTime * 5) * 3);
+        const isTelegraphing = Boolean(state.telegraph);
+        const flashFrame = isTelegraphing && (Math.floor(state.animTime * 14) % 2 === 0);
+
+        let oppSprite = SPRITE_OPP_STANDING;
+        let oppY = 200 + idleBob;
+        let oppScale = 6;
+
+        if (state.pos === 'STANDING') {
+          oppSprite = SPRITE_OPP_STANDING;
+          oppY = 198 + idleBob;
+          oppScale = 6;
+        } else if (state.pos === 'BACK_CONTROL') {
+          oppSprite = SPRITE_OPP_BACK;
+          oppY = 212 + idleBob;
+          oppScale = 6;
+        } else if (state.pos.startsWith('TOP_')) {
+          oppSprite = SPRITE_OPP_PINNED;
+          oppY = 232 + Math.round(idleBob * 0.5);
+          oppScale = 6;
+        } else {
+          oppSprite = SPRITE_OPP_OVER;
+          oppY = 196 + idleBob;
+          oppScale = 7;
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.fillRect(320, 272, 160, 14);
+
+        drawPixelSprite(oppSprite, 400, oppY, oppScale, flashFrame);
+
+        // Foreground Player Black Gi Silhouette
+        const playerBob = Math.round(Math.cos(state.animTime * 4) * 2);
+        drawPixelSprite(SPRITE_PLAYER_FOREGROUND, 400, 336 + playerBob, 7, false);
       }
 
-      // Opponent Ground Shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-      ctx.fillRect(320, 272, 160, 14);
-
-      drawPixelSprite(oppSprite, 400, oppY, oppScale, flashFrame);
-
-      // 4. Player Sprite (Black Gi Over-The-Shoulder Punch-Out View)
-      const playerLunge = state.playerPunchAnim > 0 ? -16 : 0;
-      const playerBob = Math.round(Math.cos(state.animTime * 4) * 2);
-      drawPixelSprite(SPRITE_PLAYER_FOREGROUND, 400, 336 + playerBob + playerLunge, 7, false);
-
-      // 5. Arcade HUD Bars
+      // 4. Arcade HUD Bars
       drawBar(24, 18, 260, 22, state.playerStamina, 100, '#00f5d4', 'YOU (BLACK GI)');
       const postColor = state.oppPosture <= 45 ? '#f5b700' : '#ff3b5c';
       drawBar(516, 18, 260, 22, state.oppPosture, 100, postColor, 'OPP (RED GI)');
 
       // Telegraph Reaction Timer Bar
-      if (state.telegraph) {
+      if (state.telegraph && !state.activeAnim) {
         const pct = Math.max(0, state.telegraph.timer / state.telegraph.maxTimer);
         ctx.fillStyle = '#140d22';
         ctx.fillRect(218, 66, 364, 20);
@@ -936,13 +1157,13 @@
         ctx.fillText(`! ${state.telegraph.label} — HIT SPACE !`, 400, 58);
       }
 
-      // Action Flash Banner
-      if (state.flashTimer > 0) {
+      // Action Result Flash Banner
+      if (state.flashTimer > 0 && !state.activeAnim) {
+        ctx.font = 'bold 20px "Courier New", monospace';
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#0b0812';
         ctx.fillText(state.flashMsg, 402, 114);
         ctx.fillStyle = '#ffd166';
-        ctx.font = 'bold 20px "Courier New", monospace';
-        ctx.textAlign = 'center';
         ctx.fillText(state.flashMsg, 400, 112);
       }
 
@@ -970,34 +1191,43 @@
       lastTime = now;
 
       state.animTime += dt;
-      if (state.playerPunchAnim > 0) state.playerPunchAnim -= dt;
 
       if (!state.gameOver) {
-        state.timeLeft -= dt;
-        if (state.timeLeft <= 0) {
-          state.timeLeft = 0;
-          endMatch(false);
-        }
-
-        state.playerStamina = Math.min(100, state.playerStamina + 4.5 * dt);
-        if (state.pos !== 'STANDING') {
-          state.oppPosture = Math.min(100, state.oppPosture + 1.8 * dt);
-        }
-
-        if (state.telegraph) {
-          state.telegraph.timer -= dt;
-          if (state.telegraph.timer <= 0) {
-            state.pos = state.telegraph.failTarget;
-            state.oppPosture = Math.min(100, state.oppPosture + 20);
-            state.telegraph = null;
-            state.oppCooldown = 3.5;
-            triggerFlash('TOO LATE! OPPONENT IMPROVED POSITION!', true);
-            setTip(`You missed the counter window! Now in ${POSITIONS[state.pos].name}.`);
+        // Advance active transition/submission animation if running
+        if (state.activeAnim) {
+          state.activeAnim.timer -= dt;
+          if (state.activeAnim.timer <= 0) {
+            const callback = state.activeAnim.onComplete;
+            state.activeAnim = null;
+            if (callback) callback();
           }
-        } else if (state.pos !== 'STANDING') {
-          state.oppCooldown -= dt;
-          if (state.oppCooldown <= 0) {
-            spawnOpponentTelegraph();
+        } else {
+          state.timeLeft -= dt;
+          if (state.timeLeft <= 0) {
+            state.timeLeft = 0;
+            endMatch(false);
+          }
+
+          state.playerStamina = Math.min(100, state.playerStamina + 4.5 * dt);
+          if (state.pos !== 'STANDING') {
+            state.oppPosture = Math.min(100, state.oppPosture + 1.8 * dt);
+          }
+
+          if (state.telegraph) {
+            state.telegraph.timer -= dt;
+            if (state.telegraph.timer <= 0) {
+              state.pos = state.telegraph.failTarget;
+              state.oppPosture = Math.min(100, state.oppPosture + 20);
+              state.telegraph = null;
+              state.oppCooldown = 3.5;
+              triggerFlash('TOO LATE! OPPONENT IMPROVED POSITION!', true);
+              setTip(`You missed the counter window! Now in ${POSITIONS[state.pos].name}.`);
+            }
+          } else if (state.pos !== 'STANDING') {
+            state.oppCooldown -= dt;
+            if (state.oppCooldown <= 0) {
+              spawnOpponentTelegraph();
+            }
           }
         }
 
