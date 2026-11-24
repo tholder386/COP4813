@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TAP OUT!! | BJJ Positional & Submission Trainer</title>
+  <style>
+    :root {
+      --bg-dark: #0f0a1a;
+      --panel-bg: #1a122b;
+      --border-purple: #5b2c98;
+      --accent-purple: #9d4edd;
+      --accent-gold: #f5b700;
+      --accent-cyan: #00f5d4;
+      --accent-red: #ff3b5c;
+      --text-main: #f3effa;
+      --text-muted: #b4a7cc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+      max-width: 820px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: var(--accent-gold);
+      text-shadow: 0 0 12px rgba(157, 78, 221, 0.7);
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .game-wrapper {
+      background: var(--panel-bg);
+      border: 2px solid var(--border-purple);
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 840px;
+      width: 100%;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: #271a40;
+      border: 1px solid var(--accent-purple);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .badge span {
+      color: var(--accent-cyan);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: radial-gradient(circle at 50% 35%, #2a1b47 0%, #120b21 100%);
+      border: 2px solid #3c1e66;
+      border-radius: 8px;
+    }
+
+    .edu-banner {
+      margin-top: 10px;
+      background: #23163b;
+      border-left: 4px solid var(--accent-cyan);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .edu-banner strong {
+      color: var(--accent-cyan);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .control-box {
+      background: #140d22;
+      border: 1px solid #381e5c;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .control-box h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      background: #2d1b4e;
+      color: var(--text-main);
+      border: 1px solid var(--accent-purple);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent-purple);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    button.sub-btn {
+      border-color: var(--accent-gold);
+      color: #ffe89e;
+    }
+
+    button.sub-btn:hover:not(:disabled) {
+      background: #b8860b;
+      color: #fff;
+    }
+
+    button.counter-btn {
+      border-color: var(--accent-red);
+      background: #4a1525;
+      animation: pulse 0.7s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { box-shadow: 0 0 4px var(--accent-red); }
+      to { box-shadow: 0 0 14px var(--accent-red); }
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #331c54;
+    }
+
+    /* Modal for Rules & Scorecard */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 4, 15, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal {
+      background: var(--panel-bg);
+      border: 2px solid var(--accent-purple);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+
+    .modal h2 {
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+    }
+
+    .modal p, .modal li {
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .modal ul {
+      padding-left: 20px;
+      margin-bottom: 14px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>TAP OUT!!</h1>
+    <div class="subtitle">Arcade Positional Grappling &amp; Submission Trainer</div>
+  </header>
+
+  <main class="game-wrapper">
+    <div class="top-bar">
+      <div class="badge">POSITION: <span id="posLabel">STANDING</span></div>
+      <div class="badge">IBJJF POINTS: <span id="pointsLabel">0</span></div>
+      <div class="badge">TIME: <span id="timerLabel">03:00</span></div>
+      <div class="badge">EFFICIENCY: <span id="effLabel">100%</span></div>
+    </div>
+
+    <canvas id="arena" width="800" height="380"></canvas>
+
+    <div class="edu-banner" id="eduTip">
+      <strong>COACH CORNER:</strong> Both fighters start standing. Engage the clinch to trigger a takedown scramble!
+    </div>
+
+    <div class="controls-grid">
+      <div class="control-box">
+        <h3>1. Movement, Transitions &amp; Defense</h3>
+        <div class="btn-row" id="transitionControls"></div>
+      </div>
+      <div class="control-box">
+        <h3>2. Submissions (Requires Low Opponent Posture)</h3>
+        <div class="btn-row" id="submissionControls"></div>
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <button id="rulesBtn">Rules &amp; BJJ Guide</button>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Hotkeys: [SPACE] Counter / Defend | [R] Reset Match</span>
+      <button id="resetBtn">Restart Match</button>
+    </div>
+  </main>
+
+  <!-- Rules / Intro Modal -->
+  <div class="modal-overlay" id="rulesModal">
+    <div class="modal">
+      <h2>How to Play TAP OUT!!</h2>
+      <p>Inspired by <em>Mike Tyson's Punch-Out!!</em>, this game teaches the positional hierarchy of Brazilian Jiu-Jitsu:</p>
+      <ul>
+        <li><strong>Standing &amp; Clinch:</strong> Initiate a clinch to roll for a takedown. You will land in either <strong>Top Half Guard</strong> (+2 pts) or <strong>Bottom Full Guard</strong>.</li>
+        <li><strong>Positional Hierarchy:</strong> Advance from <em>Full Guard &rarr; Half Guard &rarr; Mount &rarr; Back Control</em> (or sweep from bottom to top) to break your opponent's posture.</li>
+        <li><strong>Telegraphed Counters:</strong> Watch the opponent! When they flash <span style="color:#ff3b5c;font-weight:bold;">RED</span> to pass or sweep, hit <strong>COUNTER [SPACE]</strong> before the timer bar empties to reverse them (including taking their back)!</li>
+        <li><strong>Submissions:</strong> Once opponent posture drops below <strong>45%</strong>, position-specific submissions unlock (<strong>Armbar, Guillotine, Toe Hold, Americana, Kimura, Rear Naked Choke</strong>).</li>
+      </ul>
+      <p><strong>Performance Scoring:</strong> Measured by IBJJF positional points, move efficiency, and submission finish time.</p>
+      <button id="closeRulesBtn" style="width:100%; background: var(--accent-purple);">Step Onto the Mat</button>
+    </div>
+  </div>
+
+  <!-- End of Match Scorecard Modal -->
+  <div class="modal-overlay hidden" id="endModal">
+    <div class="modal">
+      <h2 id="endTitle">VICTORY BY SUBMISSION!</h2>
+      <p id="endSummary"></p>
+      <div id="endStats" style="background:#140d22; padding:12px; border-radius:8px; margin:12px 0; font-size:0.9rem;"></div>
+      <button id="playAgainBtn" style="width:100%; background: var(--accent-purple);">Rematch</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('arena');
+    const ctx = canvas.getContext('2d');
+
+    // Positional Database & BJJ Educational Logic
+    const POSITIONS = {
+      STANDING: {
+        name: 'STANDING (NEUTRAL)',
+        perspective: 'Both fighters on feet. Establish grips to initiate takedown.',
+        transitions: [
+          { id: 'clinch', label: 'Engage Clinch & Takedown', staminaCost: 10 }
+        ],
+        submissions: []
+      },
+      TOP_HALF: {
+        name: 'TOP HALF GUARD',
+        perspective: 'You are on top; opponent has one of your legs trapped.',
+        transitions: [
+          { id: 'pass_mount', label: 'Knee-Cut Pass to Mount (+3)', staminaCost: 18, target: 'TOP_MOUNT', pts: 3, dmg: 22 },
+          { id: 'pressure', label: 'Crossface Pressure', staminaCost: 10, dmg: 16 }
+        ],
+        submissions: [
+          { id: 'kimura', label: 'Kimura', minPosture: 45, desc: 'Isolated the far arm with a figure-four grip from top half guard.' },
+          { id: 'toehold', label: 'Toe Hold', minPosture: 45, desc: 'Backstepped on the trapped leg to apply rotational pressure to the ankle.' }
+        ]
+      },
+      TOP_MOUNT: {
+        name: 'TOP MOUNT',
+        perspective: 'Dominant pin! Seated on opponent’s torso with high control.',
+        transitions: [
+          { id: 'take_back', label: 'Gift-Wrap Back Take (+4)', staminaCost: 16, target: 'BACK_CONTROL', pts: 4, dmg: 20 },
+          { id: 'smother', label: 'High Mount & Smother', staminaCost: 12, dmg: 20 }
+        ],
+        submissions: [
+          { id: 'armbar', label: 'Armbar', minPosture: 45, desc: 'S-mount transition into a classic hyperextension armbar from mount.' },
+          { id: 'americana', label: 'Americana', minPosture: 45, desc: 'Pinned the wrist to the mat in a figure-four keylock from top mount.' },
+          { id: 'guillotine', label: 'Mounted Guillotine', minPosture: 45, desc: 'Wrapped the neck as the opponent tried to bridge and turtle out.' }
+        ]
+      },
+      BACK_CONTROL: {
+        name: 'BACK CONTROL (HOOKS IN)',
+        perspective: 'Checkmate position! Both hooks inserted with seatbelt control behind opponent.',
+        transitions: [
+          { id: 'hand_fight', label: 'Trap Wrist & Isolate Neck', staminaCost: 10, dmg: 22 }
+        ],
+        submissions: [
+          { id: 'rnc', label: 'Rear Naked Choke', minPosture: 45, desc: 'Slid the choking arm under the chin with a figure-four lock behind the head from Back Control.' }
+        ]
+      },
+      BOTTOM_FULL: {
+        name: 'BOTTOM FULL GUARD',
+        perspective: 'You are on your back with legs wrapped around opponent’s waist.',
+        transitions: [
+          { id: 'hip_bump', label: 'Hip Bump Sweep to Mount (+2)', staminaCost: 18, target: 'TOP_MOUNT', pts: 2, dmg: 20 },
+          { id: 'scissor_sweep', label: 'Scissor Sweep to Top Half (+2)', staminaCost: 15, target: 'TOP_HALF', pts: 2, dmg: 16 },
+          { id: 'break_posture', label: 'Collar Drag / Break Posture', staminaCost: 10, dmg: 15 }
+        ],
+        submissions: [
+          { id: 'armbar', label: 'Armbar', minPosture: 45, desc: 'Pivoted hips perpendicular and threw leg over the head from closed guard.' },
+          { id: 'guillotine', label: 'Guillotine', minPosture: 45, desc: 'Snapped opponent’s head down and closed guard to finish the choke.' },
+          { id: 'kimura', label: 'Kimura', minPosture: 45, desc: 'Sat up with a figure-four shoulder lock from closed guard.' }
+        ]
+      },
+      BOTTOM_HALF: {
+        name: 'BOTTOM HALF GUARD',
+        perspective: 'You are on bottom trapping one leg. Fight for the underhook!',
+        transitions: [
+          { id: 'dogfight', label: 'Underhook Sweep to Top Half (+2)', staminaCost: 18, target: 'TOP_HALF', pts: 2, dmg: 18 },
+          { id: 'recover_guard', label: 'Shrimp to Full Guard', staminaCost: 12, target: 'BOTTOM_FULL', pts: 0, dmg: 10 }
+        ],
+        submissions: [
+          { id: 'kimura', label: 'Kimura', minPosture: 45, desc: 'Caught the overhooking arm in a figure-four lock from bottom half guard.' },
+          { id: 'toehold', label: 'Toe Hold', minPosture: 45, desc: 'Entangled the secondary leg underneath to finish a sneaky toe hold.' }
+        ]
+      }
+    };
+
+    // Game State
+    let state = {};
+
+    function initGame() {
+      state = {
+        pos: 'STANDING',
+        playerStamina: 100,
+        oppPosture: 100,
+        points: 0,
+        timeLeft: 180, // 3 minute round
+        attempts: 0,
+        successes: 0,
+        gameOver: false,
+        telegraph: null, // { label, timer, maxTimer, counterTarget, failTarget }
+        oppCooldown: 3.2,
+        flashMsg: '',
+        flashTimer: 0,
+        shakeTimer: 0
+      };
+      updateUI();
+      setTip('Both fighters start standing. Engage the clinch to trigger a takedown scramble!');
+    }
+
+    function setTip(text) {
+      document.getElementById('eduTip').innerHTML = `<strong>COACH CORNER:</strong> ${text}`;
+    }
+
+    function triggerFlash(msg, shake = false) {
+      state.flashMsg = msg;
+      state.flashTimer = 1.4;
+      if (shake) state.shakeTimer = 0.25;
+    }
+
+    // Player Action Handlers
+    function handleTransition(t) {
+      if (state.gameOver) return;
+      state.attempts++;
+
+      if (state.playerStamina < t.staminaCost) {
+        triggerFlash('TOO GASSED! Recovering stamina...', true);
+        state.playerStamina = Math.min(100, state.playerStamina + 15);
+        updateUI();
+        return;
+      }
+
+      state.playerStamina = Math.max(0, state.playerStamina - t.staminaCost);
+
+      // Standing Clinch RNG Takedown Roll
+      if (t.id === 'clinch') {
+        const roll = Math.random();
+        state.successes++;
+        if (roll >= 0.45) {
+          state.pos = 'TOP_HALF';
+          state.points += 2;
+          state.oppPosture = Math.max(20, state.oppPosture - 20);
+          triggerFlash('TAKEDOWN LANDED! (+2 PTS)', true);
+          setTip('Nice single-leg takedown! You landed in Top Half Guard. Pass to Mount or attack a Kimura/Toe Hold.');
+        } else {
+          state.pos = 'BOTTOM_FULL';
+          state.oppPosture = Math.max(20, state.oppPosture - 10);
+          triggerFlash('PULLED FULL GUARD!', true);
+          setTip('Opponent stuffed the shot, so you pulled Bottom Full Guard. Break their posture or hit a sweep!');
+        }
+        state.telegraph = null;
+        state.oppCooldown = 2.8;
+        updateUI();
+        return;
+      }
+
+      // Standard Positional Transition or Posture Break
+      const successChance = 0.85 - (state.oppPosture * 0.002);
+      if (Math.random() <= successChance) {
+        state.successes++;
+        state.oppPosture = Math.max(10, state.oppPosture - (t.dmg || 15));
+        if (t.target) {
+          state.pos = t.target;
+          state.points += (t.pts || 0);
+          triggerFlash(`${t.label.toUpperCase()}!`, true);
+          setTip(POSITIONS[state.pos].perspective);
+        } else {
+          triggerFlash('POSTURE BROKEN!', true);
+          setTip(`Opponent posture dropped to ${Math.round(state.oppPosture)}%. Submissions unlock below 45%!`);
+        }
+      } else {
+        triggerFlash('STUFFED BY OPPONENT!', true);
+        setTip('Opponent defended the transition. Break their posture first or wait to counter their attack!');
+      }
+
+      updateUI();
+    }
+
+    function handleSubmission(sub) {
+      if (state.gameOver) return;
+      state.attempts++;
+
+      if (state.oppPosture > sub.minPosture) {
+        triggerFlash('POSTURE TOO HIGH TO FINISH!', true);
+        setTip(`Break opponent posture below ${sub.minPosture}% before locking in the ${sub.label}!`);
+        return;
+      }
+
+      // Submission finish calculation
+      const finishProb = Math.min(0.95, 0.55 + ((45 - state.oppPosture) * 0.012));
+      if (Math.random() <= finishProb) {
+        state.successes++;
+        endMatch(true, sub);
+      } else {
+        state.playerStamina = Math.max(5, state.playerStamina - 20);
+        state.oppPosture = Math.min(100, state.oppPosture + 25);
+        triggerFlash('ESCAPED! OPPONENT POSTURED UP!', true);
+        setTip(`They slipped out of the ${sub.label}! Rebuild control and break their posture again.`);
+        updateUI();
+      }
+    }
+
+    function handleCounter() {
+      if (!state.telegraph || state.gameOver) return;
+      state.attempts++;
+      state.successes++;
+
+      const newPos = state.telegraph.counterTarget;
+      const bonusPts = newPos === 'BACK_CONTROL' ? 4 : 2;
+      state.pos = newPos;
+      state.points += bonusPts;
+      state.oppPosture = Math.max(15, state.oppPosture - 25);
+      state.playerStamina = Math.min(100, state.playerStamina + 15);
+      state.telegraph = null;
+      state.oppCooldown = 3.2;
+
+      triggerFlash(`PERFECT REVERSAL COUNTER! (+${bonusPts} PTS)`, true);
+      setTip(`Great timing! You countered their telegraph and transitioned directly into ${POSITIONS[newPos].name}.`);
+      updateUI();
+    }
+
+    // Opponent AI Telegraph System (Punch-Out style)
+    function spawnOpponentTelegraph() {
+      if (state.pos === 'STANDING') return;
+
+      const attacks = {
+        TOP_HALF: {
+          label: 'OPPONENT UNDERHOOK SWEEP!',
+          counterTarget: 'TOP_MOUNT',
+          failTarget: 'BOTTOM_HALF'
+        },
+        TOP_MOUNT: {
+          label: 'OPPONENT TURNS TO ESCAPE!',
+          counterTarget: 'BACK_CONTROL',
+          failTarget: 'BOTTOM_FULL'
+        },
+        BACK_CONTROL: {
+          label: 'OPPONENT SLIPPING BACK TO MAT!',
+          counterTarget: 'BACK_CONTROL',
+          failTarget: 'TOP_HALF'
+        },
+        BOTTOM_FULL: {
+          label: 'OPPONENT GUARD PASS!',
+          counterTarget: 'TOP_HALF',
+          failTarget: 'BOTTOM_HALF'
+        },
+        BOTTOM_HALF: {
+          label: 'OPPONENT CROSSFACE PASS!',
+          counterTarget: 'BOTTOM_FULL',
+          failTarget: 'BOTTOM_HALF'
+        }
+      };
+
+      const atk = attacks[state.pos];
+      if (!atk) return;
+
+      state.telegraph = {
+        label: atk.label,
+        timer: 1.75, // 1.75s reaction window
+        maxTimer: 1.75,
+        counterTarget: atk.counterTarget,
+        failTarget: atk.failTarget
+      };
+      setTip(`WATCH OUT! ${atk.label} Press COUNTER [SPACE] before the red bar runs out!`);
+      updateUI();
+    }
+
+    function endMatch(playerWon, sub = null) {
+      state.gameOver = true;
+      const modal = document.getElementById('endModal');
+      const title = document.getElementById('endTitle');
+      const summary = document.getElementById('endSummary');
+      const stats = document.getElementById('endStats');
+
+      const elapsed = 180 - Math.ceil(state.timeLeft);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const secs = String(elapsed % 60).padStart(2, '0');
+      const eff = state.attempts > 0 ? Math.round((state.successes / state.attempts) * 100) : 100;
+
+      if (playerWon && sub) {
+        title.textContent = `TAP OUT! VICTORY BY ${sub.label.toUpperCase()}!`;
+        title.style.color = '#00f5d4';
+        summary.textContent = `Technique Breakdown: ${sub.desc}`;
+      } else if (state.points > 0) {
+        title.textContent = 'TIME EXPIRED — VICTORY ON POINTS!';
+        title.style.color = '#f5b700';
+        summary.textContent = 'You controlled the positional hierarchy and won via IBJJF positional scoring.';
+      } else {
+        title.textContent = 'TIME EXPIRED — DRAW / LOSS';
+        title.style.color = '#ff3b5c';
+        summary.textContent = 'Focus on chaining transitions (Guard -> Sweep -> Mount -> Back Control) to unlock submissions.';
+      }
+
+      stats.innerHTML = `
+        <strong>Match Performance Metrics:</strong><br/>
+        • Final Position: ${POSITIONS[state.pos].name}<br/>
+        • IBJJF Positional Points: ${state.points}<br/>
+        • Match Duration: ${mins}:${secs}<br/>
+        • Technical Efficiency: ${eff}% (${state.successes}/${state.attempts} successful actions)
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    // Dynamic Button Rendering
+    function updateUI() {
+      const posData = POSITIONS[state.pos];
+      document.getElementById('posLabel').textContent = posData.name;
+      document.getElementById('pointsLabel').textContent = state.points;
+
+      const mins = String(Math.floor(Math.max(0, state.timeLeft) / 60)).padStart(2, '0');
+      const secs = String(Math.ceil(Math.max(0, state.timeLeft)) % 60).padStart(2, '0');
+      document.getElementById('timerLabel').textContent = `${mins}:${secs}`;
+
+      const eff = state.attempts > 0 ? Math.round((state.successes / state.attempts) * 100) : 100;
+      document.getElementById('effLabel').textContent = `${eff}%`;
+
+      // Render Transition / Counter Buttons
+      const transDiv = document.getElementById('transitionControls');
+      transDiv.innerHTML = '';
+
+      if (state.telegraph) {
+        const cBtn = document.createElement('button');
+        cBtn.className = 'counter-btn';
+        cBtn.textContent = '⚡ COUNTER / REVERSE [SPACE]';
+        cBtn.onclick = handleCounter;
+        transDiv.appendChild(cBtn);
+      }
+
+      posData.transitions.forEach(t => {
+        const btn = document.createElement('button');
+        btn.textContent = `${t.label} (-${t.staminaCost} Stam)`;
+        btn.disabled = state.gameOver || Boolean(state.telegraph);
+        btn.onclick = () => handleTransition(t);
+        transDiv.appendChild(btn);
+      });
+
+      // Render Submission Buttons
+      const subDiv = document.getElementById('submissionControls');
+      subDiv.innerHTML = '';
+      if (posData.submissions.length === 0) {
+        subDiv.innerHTML = '<span style="font-size:0.82rem;color:#8e7ea8;">No submissions available from Standing.</span>';
+      } else {
+        posData.submissions.forEach(sub => {
+          const btn = document.createElement('button');
+          btn.className = 'sub-btn';
+          const ready = state.oppPosture <= sub.minPosture;
+          btn.textContent = ready ? `🔒 ${sub.label} (READY)` : `${sub.label} (Need <${sub.minPosture}% Posture)`;
+          btn.disabled = state.gameOver || !ready || Boolean(state.telegraph);
+          btn.onclick = () => handleSubmission(sub);
+          subDiv.appendChild(btn);
+        });
+      }
+    }
+
+    // Canvas Rendering (Punch-Out Over-The-Shoulder Perspective)
+    function drawArena() {
+      ctx.save();
+      if (state.shakeTimer > 0) {
+        const dx = (Math.random() - 0.5) * 10;
+        const dy = (Math.random() - 0.5) * 10;
+        ctx.translate(dx, dy);
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Tatami Mat Perspective Grid
+      ctx.strokeStyle = 'rgba(157, 78, 221, 0.22)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(140, 130); ctx.lineTo(660, 130);
+      ctx.lineTo(780, 360); ctx.lineTo(20, 360);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(42, 23, 77, 0.45)';
+      ctx.fill();
+
+      // Inner Competition Boundary
+      ctx.strokeStyle = 'rgba(245, 183, 0, 0.35)';
+      ctx.strokeRect(180, 155, 440, 175);
+
+      // Opponent Visual Representation (Changes by Position & Telegraph)
+      const isTelegraphing = Boolean(state.telegraph);
+      const oppColor = isTelegraphing ? '#ff3b5c' : '#e0d6f5';
+      const giColor = isTelegraphing ? '#801336' : '#3b2466';
+
+      ctx.save();
+      ctx.translate(400, 210);
+
+      if (state.pos === 'STANDING') {
+        // Opponent standing square
+        ctx.fillStyle = giColor;
+        ctx.fillRect(-45, -45, 90, 85);
+        ctx.strokeStyle = oppColor;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-45, -45, 90, 85);
+        // Head
+        ctx.beginPath();
+        ctx.arc(0, -68, 22, 0, Math.PI * 2);
+        ctx.fillStyle = '#d4a373';
+        ctx.fill();
+      } else if (state.pos === 'BACK_CONTROL') {
+        // Opponent facing away from you (back of gi & back of head)
+        ctx.fillStyle = giColor;
+        ctx.fillRect(-55, -35, 110, 75);
+        ctx.strokeStyle = oppColor;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-55, -35, 110, 75);
+        // Back of head (darker hair/shadow)
+        ctx.beginPath();
+        ctx.arc(0, -58, 21, 0, Math.PI * 2);
+        ctx.fillStyle = '#3b2820';
+        ctx.fill();
+        ctx.strokeStyle = oppColor;
+        ctx.stroke();
+      } else if (state.pos.startsWith('TOP_')) {
+        // Opponent pinned beneath you (looking down)
+        ctx.fillStyle = giColor;
+        ctx.fillRect(-65, -25, 130, 60);
+        ctx.strokeStyle = oppColor;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-65, -25, 130, 60);
+        // Head on mat
+        ctx.beginPath();
+        ctx.arc(0, -45, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#d4a373';
+        ctx.fill();
+      } else {
+        // Opponent postured over you (you are in bottom guard)
+        ctx.fillStyle = giColor;
+        ctx.fillRect(-55, -60, 110, 95);
+        ctx.strokeStyle = oppColor;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-55, -60, 110, 95);
+        // Head towering
+        ctx.beginPath();
+        ctx.arc(0, -82, 23, 0, Math.PI * 2);
+        ctx.fillStyle = '#d4a373';
+        ctx.fill();
+      }
+
+      // Black Belt bar across opponent
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-45, 10, 90, 10);
+      ctx.fillStyle = '#ff3b5c';
+      ctx.fillRect(25, 10, 15, 10);
+      ctx.restore();
+
+      // Player Silhouette (Punch-Out foreground wireframe/gloves/grips)
+      ctx.fillStyle = 'rgba(0, 245, 212, 0.18)';
+      ctx.strokeStyle = '#00f5d4';
+      ctx.lineWidth = 2.5;
+      // Left & Right Foreground Forearms/Grips
+      ctx.beginPath();
+      ctx.roundRect(190, 275, 70, 95, 16);
+      ctx.roundRect(540, 275, 70, 95, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      // HUD Bars: Player Stamina (Left) & Opponent Posture (Right)
+      drawBar(24, 22, 260, 20, state.playerStamina, 100, '#00f5d4', 'YOUR STAMINA');
+      const postColor = state.oppPosture <= 45 ? '#f5b700' : '#ff3b5c';
+      drawBar(516, 22, 260, 20, state.oppPosture, 100, postColor, 'OPPONENT POSTURE');
+
+      // Telegraph Reaction Bar
+      if (state.telegraph) {
+        const pct = Math.max(0, state.telegraph.timer / state.telegraph.maxTimer);
+        ctx.fillStyle = 'rgba(255, 59, 92, 0.9)';
+        ctx.fillRect(220, 72, 360 * pct, 18);
+        ctx.strokeStyle = '#fff';
+        ctx.strokeRect(220, 72, 360, 18);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`⚠️ ${state.telegraph.label} — HIT SPACE!`, 400, 64);
+      }
+
+      // Action Flash Banner
+      if (state.flashTimer > 0) {
+        ctx.fillStyle = '#f5b700';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(state.flashMsg, 400, 118);
+      }
+
+      ctx.restore();
+    }
+
+    function drawBar(x, y, w, h, val, max, color, label) {
+      ctx.fillStyle = '#140d22';
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w * (val / max), h);
+      ctx.strokeStyle = '#6c43a8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${label}: ${Math.round(val)}%`, x + 6, y + 14);
+    }
+
+    // Main Game Loop
+    let lastTime = performance.now();
+    function loop(now) {
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      if (!state.gameOver) {
+        state.timeLeft -= dt;
+        if (state.timeLeft <= 0) {
+          state.timeLeft = 0;
+          endMatch(false);
+        }
+
+        // Passive stamina regen & slight opponent posture recovery
+        state.playerStamina = Math.min(100, state.playerStamina + 4.5 * dt);
+        if (state.pos !== 'STANDING') {
+          state.oppPosture = Math.min(100, state.oppPosture + 1.8 * dt);
+        }
+
+        // Telegraph timer countdown
+        if (state.telegraph) {
+          state.telegraph.timer -= dt;
+          if (state.telegraph.timer <= 0) {
+            // Player missed the counter window
+            state.pos = state.telegraph.failTarget;
+            state.oppPosture = Math.min(100, state.oppPosture + 20);
+            state.telegraph = null;
+            state.oppCooldown = 3.5;
+            triggerFlash('TOO LATE! OPPONENT IMPROVED POSITION!', true);
+            setTip(`You missed the counter window! Now in ${POSITIONS[state.pos].name}.`);
+            updateUI();
+          }
+        } else if (state.pos !== 'STANDING') {
+          state.oppCooldown -= dt;
+          if (state.oppCooldown <= 0) {
+            spawnOpponentTelegraph();
+          }
+        }
+
+        if (state.flashTimer > 0) state.flashTimer -= dt;
+        if (state.shakeTimer > 0) state.shakeTimer -= dt;
+
+        updateUI();
+      }
+
+      drawArena();
+      requestAnimationFrame(loop);
+    }
+
+    // Event Listeners
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleCounter();
+      } else if (e.key.toLowerCase() === 'r') {
+        initGame();
+      }
+    });
+
+    document.getElementById('rulesBtn').onclick = () => document.getElementById('rulesModal').classList.remove('hidden');
+    document.getElementById('closeRulesBtn').onclick = () => document.getElementById('rulesModal').classList.add('hidden');
+    document.getElementById('resetBtn').onclick = initGame;
+    document.getElementById('playAgainBtn').onclick = () => {
+      document.getElementById('endModal').classList.add('hidden');
+      initGame();
+    };
+
+    initGame();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
