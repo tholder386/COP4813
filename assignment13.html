@@ -39,9 +39,11 @@
 
     h1 {
       font-size: 2rem;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       color: var(--accent-gold);
-      text-shadow: 0 0 12px rgba(157, 78, 221, 0.7);
+      text-shadow: 3px 3px 0px #4a154b, 0 0 14px rgba(157, 78, 221, 0.7);
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 900;
     }
 
     .subtitle {
@@ -85,9 +87,11 @@
       display: block;
       width: 100%;
       height: auto;
-      background: radial-gradient(circle at 50% 35%, #2a1b47 0%, #120b21 100%);
-      border: 2px solid #3c1e66;
+      background: #120b21;
+      border: 3px solid #4c2680;
       border-radius: 8px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
 
     .edu-banner {
@@ -184,7 +188,6 @@
       border-top: 1px solid #331c54;
     }
 
-    /* Modal for Rules & Scorecard */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -259,9 +262,9 @@
     </div>
 
     <div class="footer-actions">
-      <button id="rulesBtn">Rules &amp; BJJ Guide</button>
+      <button id="rulesBtn" type="button">Rules &amp; BJJ Guide</button>
       <span style="font-size: 0.8rem; color: var(--text-muted);">Hotkeys: [SPACE] Counter / Defend | [R] Reset Match</span>
-      <button id="resetBtn">Restart Match</button>
+      <button id="resetBtn" type="button">Restart Match</button>
     </div>
   </main>
 
@@ -273,11 +276,11 @@
       <ul>
         <li><strong>Standing &amp; Clinch:</strong> Initiate a clinch to roll for a takedown. You will land in either <strong>Top Half Guard</strong> (+2 pts) or <strong>Bottom Full Guard</strong>.</li>
         <li><strong>Positional Hierarchy:</strong> Advance from <em>Full Guard &rarr; Half Guard &rarr; Mount &rarr; Back Control</em> (or sweep from bottom to top) to break your opponent's posture.</li>
-        <li><strong>Telegraphed Counters:</strong> Watch the opponent! When they flash <span style="color:#ff3b5c;font-weight:bold;">RED</span> to pass or sweep, hit <strong>COUNTER [SPACE]</strong> before the timer bar empties to reverse them (including taking their back)!</li>
+        <li><strong>Telegraphed Counters:</strong> Watch the opponent in the Red Gi! When he flashes <span style="color:#ff3b5c;font-weight:bold;">YELLOW/RED</span> to pass or sweep, hit <strong>COUNTER [SPACE]</strong> before the timer bar empties to reverse him (including taking his back)!</li>
         <li><strong>Submissions:</strong> Once opponent posture drops below <strong>45%</strong>, position-specific submissions unlock (<strong>Armbar, Guillotine, Toe Hold, Americana, Kimura, Rear Naked Choke</strong>).</li>
       </ul>
       <p><strong>Performance Scoring:</strong> Measured by IBJJF positional points, move efficiency, and submission finish time.</p>
-      <button id="closeRulesBtn" style="width:100%; background: var(--accent-purple);">Step Onto the Mat</button>
+      <button id="closeRulesBtn" type="button" style="width:100%; background: var(--accent-purple);">Step Onto the Mat</button>
     </div>
   </div>
 
@@ -287,15 +290,192 @@
       <h2 id="endTitle">VICTORY BY SUBMISSION!</h2>
       <p id="endSummary"></p>
       <div id="endStats" style="background:#140d22; padding:12px; border-radius:8px; margin:12px 0; font-size:0.9rem;"></div>
-      <button id="playAgainBtn" style="width:100%; background: var(--accent-purple);">Rematch</button>
+      <button id="playAgainBtn" type="button" style="width:100%; background: var(--accent-purple);">Rematch</button>
     </div>
   </div>
 
   <script>
     const canvas = document.getElementById('arena');
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
 
-    // Positional Database & BJJ Educational Logic
+    // =========================================================================
+    // 16-BIT PIXEL ART SPRITE ENGINE (PUNCH-OUT!! STYLE)
+    // =========================================================================
+    // Palette codes:
+    // . = transparent
+    // O = black outline (#0b0812)
+    // H = dark hair (#231712)
+    // S = skin base (#e0a370), s = skin shadow (#b57848)
+    // E = eye white (#ffffff), P = pupil (#0b0812)
+    // R = red gi main (#d62839), r = red gi dark fold (#8f1622), L = red gi highlight (#ff5964)
+    // B = black gi main (#262430), b = black gi shadow (#14131a), G = black gi highlight (#474359)
+    // K = black belt (#111116), T = red rank tip (#ff2a4b)
+    // W = gold telegraph flash (#ffd166)
+
+    const PALETTE = {
+      O: '#0b0812',
+      H: '#231712',
+      S: '#e0a370',
+      s: '#b57848',
+      E: '#ffffff',
+      P: '#0b0812',
+      R: '#d62839',
+      r: '#8f1622',
+      L: '#ff5964',
+      B: '#282634',
+      b: '#14131a',
+      G: '#4b475e',
+      K: '#101015',
+      T: '#ff2a4b',
+      W: '#ffd166'
+    };
+
+    // 1. Opponent Standing Fighting Stance (Red Gi, 22x28)
+    const SPRITE_OPP_STANDING = [
+      '.......OOOOOOOO.......',
+      '......OHHHHHHHHO......',
+      '.....OHHHHHHHHHHO.....',
+      '.....OHSSSSSSSSHO.....',
+      '.....OSEPO..OPESs.....',
+      '.....OSSSSssSSSSO.....',
+      '......OSSSSSSSSO......',
+      '.......OOsSSsOO.......',
+      '....OOOORRRRRROOOO....',
+      '..OORRRRLRssRLRRRROO..',
+      '.ORRRRRRRLssLRRRRRRRO.',
+      '.ORRrRRRRRssRRRRRrRRO.',
+      'OSSSOrRRRRssRRRRrOSSSO',
+      'OSSsOORRRRssRRRROOsSSO',
+      '.OOO..ORRRssRRRO..OOO.',
+      '......OKKKKKKKTO......',
+      '......OKKKKKKKKO......',
+      '.....ORRRRRRRRRRO.....',
+      '.....ORRrRRRRrRRO.....',
+      '....ORRRRO..ORRRRO....',
+      '....ORRrRO..ORrRRO....',
+      '...ORRRRO....ORRRRO...',
+      '...ORrRRO....ORrRRO...',
+      '...OOOOO......OOOOO...',
+      '..OSSSSO......OSSSSO..',
+      '..OOOOOO......OOOOOO..'
+    ];
+
+    // 2. Opponent Pinned Beneath Player (Top Mount / Top Half - Red Gi, 28x18)
+    const SPRITE_OPP_PINNED = [
+      '..........OOOOOOOO..........',
+      '.........OHHHHHHHHO.........',
+      '.........OSSSSSSSSO.........',
+      '.........OSEPOOPESs.........',
+      '..........OSSSSSSO..........',
+      '....OOOOOORRRRRRRROOOOOO....',
+      '..OORRRRRRLRssRLRRRRRRRROO..',
+      '.ORRrRRRRRRLssLRRRRRRRRrRRO.',
+      'OSSsOORRRRRRssRRRRRROOOsSSSO',
+      '.OOO..ORRRRRssRRRRRO...OOOO.',
+      '......OKKKKKKKKKKKTO........',
+      '.....ORRRRRRRRRRRRRRO.......',
+      '....ORRrRRROOOORRrRRRO......',
+      '...ORRRROO......OORRRRO.....',
+      '..OSSSSO..........OSSSSO....',
+      '..OOOOOO..........OOOOOO....'
+    ];
+
+    // 3. Opponent Back Exposed (Back Control - Red Gi facing away, 22x26)
+    const SPRITE_OPP_BACK = [
+      '.......OOOOOOOO.......',
+      '......OHHHHHHHHO......',
+      '.....OHHHHHHHHHHO.....',
+      '.....OHHHHHHHHHHO.....',
+      '.....OHHHHHHHHHHO.....',
+      '......OHHHHHHHHO......',
+      '.......OOsSSsOO.......',
+      '....OOOORRRRRROOOO....',
+      '..OORRRRRRRRRRRRRROO..',
+      '.ORRrRRRRRRRRRRRRrRRO.',
+      '.ORRrRRRRRRRRRRRRrRRO.',
+      'OSSSOrRRRRRRRRRRrOSSSO',
+      'OSSsOORRRRRRRRRROOsSSO',
+      '.OOO..ORRRRRRRRO..OOO.',
+      '......OKKKKKKKTO......',
+      '......OKKKKKKKKO......',
+      '.....ORRRRRRRRRRO.....',
+      '.....ORRrRRRRrRRO.....',
+      '....ORRRRO..ORRRRO....',
+      '....ORrRRO..ORrRRO....',
+      '....OOOOO....OOOOO....'
+    ];
+
+    // 4. Opponent Postured Over Player (Bottom Full / Half Guard - Red Gi, 24x26)
+    const SPRITE_OPP_OVER = [
+      '........OOOOOOOO........',
+      '.......OHHHHHHHHO.......',
+      '......OHHHHHHHHHHO......',
+      '......OHSSSSSSSSHO......',
+      '......OSEPO..OPESs......',
+      '......OSSSSssSSSSO......',
+      '.......OSSSSSSSSO.......',
+      '........OOsSSsOO........',
+      '....OOOOORRRRRROOOOO....',
+      '..OORRRRRRLssLRRRRRROO..',
+      '.ORRrRRRRRLssLRRRRRrRRO.',
+      'ORRrRRRRRRLssLRRRRRRrRRO',
+      'ORRrROORRRRssRRRROORrRRO',
+      'OSSSSO.ORRRssRRRO.OSSSSO',
+      '.OOOO..OKKKKKKKTO..OOOO.',
+      '......ORRRRRRRRRRO......',
+      '.....ORRrRRRRRRrRRO.....',
+      '....ORRRRO....ORRRRO....',
+      '...OSSSSO......OSSSSO...',
+      '...OOOOO........OOOOO...'
+    ];
+
+    // 5. Player Over-the-Shoulder Foreground Sprite (Black Gi, 46x15)
+    const SPRITE_PLAYER_FOREGROUND = [
+      '....OOOOOO..........................OOOOOO....',
+      '...OSSSSSSO........................OSSSSSSO...',
+      '..OSSSSSSSSO......................OSSSSSSSSO..',
+      '..OSSsSSSSSO......................OSSSSSsSSO..',
+      '.OOBBBBBBBBOO....................OOBBBBBBBBOO.',
+      'OOBBGBBBBBBBBO..................OOBBBBBBBGBBOO',
+      'OBBGBBBBBbBBBBO................OOBBBBbBBBBGBBO',
+      'OBBBBBBBbBBBBBBBOOOOOOOOOOOOOOOBBBBBBBbBBBBBBO',
+      'OBBBBBBbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbBBBBBO',
+      'OBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBO',
+      'OBBbBBBBBBBBBBBBBBKKKKKKKKKKBBBBBBBBBBBBBBbBBO',
+      'OBBbBBBBBBBBBBBBBBKKKKTTKKKKBBBBBBBBBBBBBBbBBO',
+      'OBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBO',
+      'OBbBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBbBO',
+      'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
+    ];
+
+    function drawPixelSprite(spriteRows, centerX, centerY, pixelSize, flashTelegraph = false) {
+      const height = spriteRows.length;
+      const width = spriteRows[0].length;
+      const startX = Math.round(centerX - (width * pixelSize) / 2);
+      const startY = Math.round(centerY - (height * pixelSize) / 2);
+
+      for (let y = 0; y < height; y++) {
+        const row = spriteRows[y];
+        for (let x = 0; x < width; x++) {
+          const ch = row[x];
+          if (ch === '.') continue;
+
+          let color = PALETTE[ch] || '#ffffff';
+          if (flashTelegraph) {
+            if (ch === 'R' || ch === 'L') color = '#ff2a4b';
+            if (ch === 'r') color = '#ffd166';
+          }
+
+          ctx.fillStyle = color;
+          ctx.fillRect(startX + x * pixelSize, startY + y * pixelSize, pixelSize, pixelSize);
+        }
+      }
+    }
+
+    // =========================================================================
+    // BJJ POSITIONAL STATE MACHINE & EDUCATIONAL LOGIC
+    // =========================================================================
     const POSITIONS = {
       STANDING: {
         name: 'STANDING (NEUTRAL)',
@@ -368,8 +548,8 @@
       }
     };
 
-    // Game State
     let state = {};
+    let lastRenderSignature = '';
 
     function initGame() {
       state = {
@@ -377,17 +557,21 @@
         playerStamina: 100,
         oppPosture: 100,
         points: 0,
-        timeLeft: 180, // 3 minute round
+        timeLeft: 180,
         attempts: 0,
         successes: 0,
         gameOver: false,
-        telegraph: null, // { label, timer, maxTimer, counterTarget, failTarget }
+        telegraph: null,
         oppCooldown: 3.2,
         flashMsg: '',
         flashTimer: 0,
-        shakeTimer: 0
+        shakeTimer: 0,
+        animTime: 0,
+        playerPunchAnim: 0
       };
-      updateUI();
+      lastRenderSignature = '';
+      updateHUD();
+      renderControls(true);
       setTip('Both fighters start standing. Engage the clinch to trigger a takedown scramble!');
     }
 
@@ -398,10 +582,10 @@
     function triggerFlash(msg, shake = false) {
       state.flashMsg = msg;
       state.flashTimer = 1.4;
+      state.playerPunchAnim = 0.25;
       if (shake) state.shakeTimer = 0.25;
     }
 
-    // Player Action Handlers
     function handleTransition(t) {
       if (state.gameOver) return;
       state.attempts++;
@@ -409,13 +593,13 @@
       if (state.playerStamina < t.staminaCost) {
         triggerFlash('TOO GASSED! Recovering stamina...', true);
         state.playerStamina = Math.min(100, state.playerStamina + 15);
-        updateUI();
+        updateHUD();
+        renderControls(true);
         return;
       }
 
       state.playerStamina = Math.max(0, state.playerStamina - t.staminaCost);
 
-      // Standing Clinch RNG Takedown Roll
       if (t.id === 'clinch') {
         const roll = Math.random();
         state.successes++;
@@ -433,11 +617,11 @@
         }
         state.telegraph = null;
         state.oppCooldown = 2.8;
-        updateUI();
+        updateHUD();
+        renderControls(true);
         return;
       }
 
-      // Standard Positional Transition or Posture Break
       const successChance = 0.85 - (state.oppPosture * 0.002);
       if (Math.random() <= successChance) {
         state.successes++;
@@ -456,7 +640,8 @@
         setTip('Opponent defended the transition. Break their posture first or wait to counter their attack!');
       }
 
-      updateUI();
+      updateHUD();
+      renderControls(true);
     }
 
     function handleSubmission(sub) {
@@ -469,7 +654,6 @@
         return;
       }
 
-      // Submission finish calculation
       const finishProb = Math.min(0.95, 0.55 + ((45 - state.oppPosture) * 0.012));
       if (Math.random() <= finishProb) {
         state.successes++;
@@ -479,7 +663,8 @@
         state.oppPosture = Math.min(100, state.oppPosture + 25);
         triggerFlash('ESCAPED! OPPONENT POSTURED UP!', true);
         setTip(`They slipped out of the ${sub.label}! Rebuild control and break their posture again.`);
-        updateUI();
+        updateHUD();
+        renderControls(true);
       }
     }
 
@@ -499,10 +684,10 @@
 
       triggerFlash(`PERFECT REVERSAL COUNTER! (+${bonusPts} PTS)`, true);
       setTip(`Great timing! You countered their telegraph and transitioned directly into ${POSITIONS[newPos].name}.`);
-      updateUI();
+      updateHUD();
+      renderControls(true);
     }
 
-    // Opponent AI Telegraph System (Punch-Out style)
     function spawnOpponentTelegraph() {
       if (state.pos === 'STANDING') return;
 
@@ -539,17 +724,18 @@
 
       state.telegraph = {
         label: atk.label,
-        timer: 1.75, // 1.75s reaction window
+        timer: 1.75,
         maxTimer: 1.75,
         counterTarget: atk.counterTarget,
         failTarget: atk.failTarget
       };
       setTip(`WATCH OUT! ${atk.label} Press COUNTER [SPACE] before the red bar runs out!`);
-      updateUI();
+      renderControls(true);
     }
 
     function endMatch(playerWon, sub = null) {
       state.gameOver = true;
+      renderControls(true);
       const modal = document.getElementById('endModal');
       const title = document.getElementById('endTitle');
       const summary = document.getElementById('endSummary');
@@ -584,8 +770,7 @@
       modal.classList.remove('hidden');
     }
 
-    // Dynamic Button Rendering
-    function updateUI() {
+    function updateHUD() {
       const posData = POSITIONS[state.pos];
       document.getElementById('posLabel').textContent = posData.name;
       document.getElementById('pointsLabel').textContent = state.points;
@@ -596,13 +781,21 @@
 
       const eff = state.attempts > 0 ? Math.round((state.successes / state.attempts) * 100) : 100;
       document.getElementById('effLabel').textContent = `${eff}%`;
+    }
 
-      // Render Transition / Counter Buttons
+    function renderControls(force = false) {
+      const subReady = state.oppPosture <= 45;
+      const sig = `${state.pos}|${Boolean(state.telegraph)}|${subReady}|${state.gameOver}`;
+      if (!force && sig === lastRenderSignature) return;
+      lastRenderSignature = sig;
+
+      const posData = POSITIONS[state.pos];
       const transDiv = document.getElementById('transitionControls');
       transDiv.innerHTML = '';
 
       if (state.telegraph) {
         const cBtn = document.createElement('button');
+        cBtn.type = 'button';
         cBtn.className = 'counter-btn';
         cBtn.textContent = '⚡ COUNTER / REVERSE [SPACE]';
         cBtn.onclick = handleCounter;
@@ -611,13 +804,13 @@
 
       posData.transitions.forEach(t => {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.textContent = `${t.label} (-${t.staminaCost} Stam)`;
         btn.disabled = state.gameOver || Boolean(state.telegraph);
         btn.onclick = () => handleTransition(t);
         transDiv.appendChild(btn);
       });
 
-      // Render Submission Buttons
       const subDiv = document.getElementById('submissionControls');
       subDiv.innerHTML = '';
       if (posData.submissions.length === 0) {
@@ -625,6 +818,7 @@
       } else {
         posData.submissions.forEach(sub => {
           const btn = document.createElement('button');
+          btn.type = 'button';
           btn.className = 'sub-btn';
           const ready = state.oppPosture <= sub.minPosture;
           btn.textContent = ready ? `🔒 ${sub.label} (READY)` : `${sub.label} (Need <${sub.minPosture}% Posture)`;
@@ -635,134 +829,121 @@
       }
     }
 
-    // Canvas Rendering (Punch-Out Over-The-Shoulder Perspective)
+    // =========================================================================
+    // RETRO ARCADE ARENA & SPRITE RENDERING
+    // =========================================================================
     function drawArena() {
       ctx.save();
       if (state.shakeTimer > 0) {
-        const dx = (Math.random() - 0.5) * 10;
-        const dy = (Math.random() - 0.5) * 10;
+        const dx = Math.round((Math.random() - 0.5) * 10);
+        const dy = Math.round((Math.random() - 0.5) * 10);
         ctx.translate(dx, dy);
       }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // 1. Dark Retro Arena Backdrop & Crowd Silhouettes
+      ctx.fillStyle = '#0d0817';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Tatami Mat Perspective Grid
-      ctx.strokeStyle = 'rgba(157, 78, 221, 0.22)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(140, 130); ctx.lineTo(660, 130);
-      ctx.lineTo(780, 360); ctx.lineTo(20, 360);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(42, 23, 77, 0.45)';
-      ctx.fill();
-
-      // Inner Competition Boundary
-      ctx.strokeStyle = 'rgba(245, 183, 0, 0.35)';
-      ctx.strokeRect(180, 155, 440, 175);
-
-      // Opponent Visual Representation (Changes by Position & Telegraph)
-      const isTelegraphing = Boolean(state.telegraph);
-      const oppColor = isTelegraphing ? '#ff3b5c' : '#e0d6f5';
-      const giColor = isTelegraphing ? '#801336' : '#3b2466';
-
-      ctx.save();
-      ctx.translate(400, 210);
-
-      if (state.pos === 'STANDING') {
-        // Opponent standing square
-        ctx.fillStyle = giColor;
-        ctx.fillRect(-45, -45, 90, 85);
-        ctx.strokeStyle = oppColor;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(-45, -45, 90, 85);
-        // Head
-        ctx.beginPath();
-        ctx.arc(0, -68, 22, 0, Math.PI * 2);
-        ctx.fillStyle = '#d4a373';
-        ctx.fill();
-      } else if (state.pos === 'BACK_CONTROL') {
-        // Opponent facing away from you (back of gi & back of head)
-        ctx.fillStyle = giColor;
-        ctx.fillRect(-55, -35, 110, 75);
-        ctx.strokeStyle = oppColor;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(-55, -35, 110, 75);
-        // Back of head (darker hair/shadow)
-        ctx.beginPath();
-        ctx.arc(0, -58, 21, 0, Math.PI * 2);
-        ctx.fillStyle = '#3b2820';
-        ctx.fill();
-        ctx.strokeStyle = oppColor;
-        ctx.stroke();
-      } else if (state.pos.startsWith('TOP_')) {
-        // Opponent pinned beneath you (looking down)
-        ctx.fillStyle = giColor;
-        ctx.fillRect(-65, -25, 130, 60);
-        ctx.strokeStyle = oppColor;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(-65, -25, 130, 60);
-        // Head on mat
-        ctx.beginPath();
-        ctx.arc(0, -45, 20, 0, Math.PI * 2);
-        ctx.fillStyle = '#d4a373';
-        ctx.fill();
-      } else {
-        // Opponent postured over you (you are in bottom guard)
-        ctx.fillStyle = giColor;
-        ctx.fillRect(-55, -60, 110, 95);
-        ctx.strokeStyle = oppColor;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(-55, -60, 110, 95);
-        // Head towering
-        ctx.beginPath();
-        ctx.arc(0, -82, 23, 0, Math.PI * 2);
-        ctx.fillStyle = '#d4a373';
-        ctx.fill();
+      // Pixel Crowd Rows
+      ctx.fillStyle = '#1b1130';
+      for (let x = 0; x < canvas.width; x += 24) {
+        const hOffset = ((x * 7) % 12);
+        ctx.fillRect(x, 82 + hOffset, 20, 48);
+      }
+      ctx.fillStyle = '#261742';
+      for (let x = 12; x < canvas.width; x += 28) {
+        const hOffset = ((x * 13) % 10);
+        ctx.fillRect(x, 96 + hOffset, 22, 36);
       }
 
-      // Black Belt bar across opponent
-      ctx.fillStyle = '#111';
-      ctx.fillRect(-45, 10, 90, 10);
-      ctx.fillStyle = '#ff3b5c';
-      ctx.fillRect(25, 10, 15, 10);
-      ctx.restore();
-
-      // Player Silhouette (Punch-Out foreground wireframe/gloves/grips)
-      ctx.fillStyle = 'rgba(0, 245, 212, 0.18)';
-      ctx.strokeStyle = '#00f5d4';
-      ctx.lineWidth = 2.5;
-      // Left & Right Foreground Forearms/Grips
+      // 2. Tatami Mat Perspective Floor (Stepped Pixel Style)
+      ctx.fillStyle = '#2d1b4e';
       ctx.beginPath();
-      ctx.roundRect(190, 275, 70, 95, 16);
-      ctx.roundRect(540, 275, 70, 95, 16);
+      ctx.moveTo(110, 128);
+      ctx.lineTo(690, 128);
+      ctx.lineTo(790, 380);
+      ctx.lineTo(10, 380);
+      ctx.closePath();
       ctx.fill();
-      ctx.stroke();
 
-      // HUD Bars: Player Stamina (Left) & Opponent Posture (Right)
-      drawBar(24, 22, 260, 20, state.playerStamina, 100, '#00f5d4', 'YOUR STAMINA');
+      // Mat Tatami Grid Lines
+      ctx.strokeStyle = '#3f266e';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(165, 152, 470, 185);
+      // Red/Gold Competition Out-of-Bounds Warning Border
+      ctx.strokeStyle = '#a82039';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(185, 166, 430, 156);
+
+      // 3. Opponent Sprite (Red Gi) with Idle Bob & Telegraph Flash
+      const idleBob = Math.round(Math.sin(state.animTime * 5) * 3);
+      const isTelegraphing = Boolean(state.telegraph);
+      const flashFrame = isTelegraphing && (Math.floor(state.animTime * 14) % 2 === 0);
+
+      let oppSprite = SPRITE_OPP_STANDING;
+      let oppY = 200 + idleBob;
+      let oppScale = 6;
+
+      if (state.pos === 'STANDING') {
+        oppSprite = SPRITE_OPP_STANDING;
+        oppY = 198 + idleBob;
+        oppScale = 6;
+      } else if (state.pos === 'BACK_CONTROL') {
+        oppSprite = SPRITE_OPP_BACK;
+        oppY = 212 + idleBob;
+        oppScale = 6;
+      } else if (state.pos.startsWith('TOP_')) {
+        oppSprite = SPRITE_OPP_PINNED;
+        oppY = 232 + Math.round(idleBob * 0.5);
+        oppScale = 6;
+      } else {
+        // BOTTOM_FULL or BOTTOM_HALF (Opponent towering over player)
+        oppSprite = SPRITE_OPP_OVER;
+        oppY = 196 + idleBob;
+        oppScale = 7;
+      }
+
+      // Opponent Ground Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.fillRect(320, 272, 160, 14);
+
+      drawPixelSprite(oppSprite, 400, oppY, oppScale, flashFrame);
+
+      // 4. Player Sprite (Black Gi Over-The-Shoulder Punch-Out View)
+      const playerLunge = state.playerPunchAnim > 0 ? -16 : 0;
+      const playerBob = Math.round(Math.cos(state.animTime * 4) * 2);
+      drawPixelSprite(SPRITE_PLAYER_FOREGROUND, 400, 336 + playerBob + playerLunge, 7, false);
+
+      // 5. Arcade HUD Bars
+      drawBar(24, 18, 260, 22, state.playerStamina, 100, '#00f5d4', 'YOU (BLACK GI)');
       const postColor = state.oppPosture <= 45 ? '#f5b700' : '#ff3b5c';
-      drawBar(516, 22, 260, 20, state.oppPosture, 100, postColor, 'OPPONENT POSTURE');
+      drawBar(516, 18, 260, 22, state.oppPosture, 100, postColor, 'OPP (RED GI)');
 
-      // Telegraph Reaction Bar
+      // Telegraph Reaction Timer Bar
       if (state.telegraph) {
         const pct = Math.max(0, state.telegraph.timer / state.telegraph.maxTimer);
-        ctx.fillStyle = 'rgba(255, 59, 92, 0.9)';
-        ctx.fillRect(220, 72, 360 * pct, 18);
-        ctx.strokeStyle = '#fff';
-        ctx.strokeRect(220, 72, 360, 18);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = '#140d22';
+        ctx.fillRect(218, 66, 364, 20);
+        ctx.fillStyle = '#ff2a4b';
+        ctx.fillRect(220, 68, Math.round(360 * pct), 16);
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(218, 66, 364, 20);
+
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 13px "Courier New", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`⚠️ ${state.telegraph.label} — HIT SPACE!`, 400, 64);
+        ctx.fillText(`! ${state.telegraph.label} — HIT SPACE !`, 400, 58);
       }
 
       // Action Flash Banner
       if (state.flashTimer > 0) {
-        ctx.fillStyle = '#f5b700';
-        ctx.font = 'bold 22px sans-serif';
+        ctx.fillStyle = '#0b0812';
+        ctx.fillText(state.flashMsg, 402, 114);
+        ctx.fillStyle = '#ffd166';
+        ctx.font = 'bold 20px "Courier New", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(state.flashMsg, 400, 118);
+        ctx.fillText(state.flashMsg, 400, 112);
       }
 
       ctx.restore();
@@ -772,22 +953,24 @@
       ctx.fillStyle = '#140d22';
       ctx.fillRect(x, y, w, h);
       ctx.fillStyle = color;
-      ctx.fillRect(x, y, w * (val / max), h);
-      ctx.strokeStyle = '#6c43a8';
+      ctx.fillRect(x + 2, y + 2, Math.round((w - 4) * (val / max)), h - 4);
+      ctx.strokeStyle = '#9d4edd';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, w, h);
 
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px "Courier New", monospace';
       ctx.textAlign = 'left';
-      ctx.fillText(`${label}: ${Math.round(val)}%`, x + 6, y + 14);
+      ctx.fillText(`${label}: ${Math.round(val)}%`, x + 8, y + 15);
     }
 
-    // Main Game Loop
     let lastTime = performance.now();
     function loop(now) {
       const dt = (now - lastTime) / 1000;
       lastTime = now;
+
+      state.animTime += dt;
+      if (state.playerPunchAnim > 0) state.playerPunchAnim -= dt;
 
       if (!state.gameOver) {
         state.timeLeft -= dt;
@@ -796,24 +979,20 @@
           endMatch(false);
         }
 
-        // Passive stamina regen & slight opponent posture recovery
         state.playerStamina = Math.min(100, state.playerStamina + 4.5 * dt);
         if (state.pos !== 'STANDING') {
           state.oppPosture = Math.min(100, state.oppPosture + 1.8 * dt);
         }
 
-        // Telegraph timer countdown
         if (state.telegraph) {
           state.telegraph.timer -= dt;
           if (state.telegraph.timer <= 0) {
-            // Player missed the counter window
             state.pos = state.telegraph.failTarget;
             state.oppPosture = Math.min(100, state.oppPosture + 20);
             state.telegraph = null;
             state.oppCooldown = 3.5;
             triggerFlash('TOO LATE! OPPONENT IMPROVED POSITION!', true);
             setTip(`You missed the counter window! Now in ${POSITIONS[state.pos].name}.`);
-            updateUI();
           }
         } else if (state.pos !== 'STANDING') {
           state.oppCooldown -= dt;
@@ -825,14 +1004,14 @@
         if (state.flashTimer > 0) state.flashTimer -= dt;
         if (state.shakeTimer > 0) state.shakeTimer -= dt;
 
-        updateUI();
+        updateHUD();
+        renderControls(false);
       }
 
       drawArena();
       requestAnimationFrame(loop);
     }
 
-    // Event Listeners
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
         e.preventDefault();
