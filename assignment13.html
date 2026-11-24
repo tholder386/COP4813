@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -299,29 +299,25 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // =========================================================================
-    // 16-BIT PIXEL ART SPRITE ENGINE (PUNCH-OUT!! STYLE)
-    // =========================================================================
     const PALETTE = {
-      O: '#0b0812', // outline
-      H: '#231712', // hair
-      S: '#e0a370', // skin
-      s: '#b57848', // skin shadow
-      E: '#ffffff', // eye white
-      P: '#0b0812', // pupil
-      R: '#d62839', // red gi
-      r: '#8f1622', // red gi shadow
-      L: '#ff5964', // red gi highlight
-      B: '#282634', // black gi
-      b: '#14131a', // black gi shadow
-      G: '#4b475e', // black gi highlight
-      K: '#101015', // black belt
-      T: '#ff2a4b', // rank bar
-      W: '#ffd166', // gold highlight
-      C: '#00f5d4'  // cyan kinetic highlight
+      O: '#0b0812',
+      H: '#231712',
+      S: '#e0a370',
+      s: '#b57848',
+      E: '#ffffff',
+      P: '#0b0812',
+      R: '#d62839',
+      r: '#8f1622',
+      L: '#ff5964',
+      B: '#282634',
+      b: '#14131a',
+      G: '#4b475e',
+      K: '#101015',
+      T: '#ff2a4b',
+      W: '#ffd166',
+      C: '#00f5d4'
     };
 
-    // Base Positional Sprites
     const SPRITE_OPP_STANDING = [
       '.......OOOOOOOO.......',
       '......OHHHHHHHHO......',
@@ -435,11 +431,6 @@
       'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'
     ];
 
-    // =========================================================================
-    // DEDICATED TRANSITION & SUBMISSION ACTION SPRITES
-    // =========================================================================
-
-    // Clinch / Takedown Drive (Black Gi shooting low into Red Gi)
     const SPRITE_ANIM_CLINCH = [
       '..........OOOOOOOO..........',
       '.........OHHHHHHHHO.........',
@@ -455,7 +446,6 @@
       '.OOOOOOOOOOOOOOOOOOOOOOOOOO.'
     ];
 
-    // Sweep / Guard Pass Scramble (Dynamic diagonal roll)
     const SPRITE_ANIM_SCRAMBLE = [
       '......OOOOOOOO..............',
       '.....OHHHHHHHHO.............',
@@ -469,7 +459,6 @@
       '.OOOOOOOOOOOOOOOOOOOOOOOOOO.'
     ];
 
-    // Armbar (Player black gi legs across Red gi chest/head, hyperextending arm)
     const SPRITE_ANIM_ARMBAR = [
       '.............OOOOOOOO...........',
       '............OHHHHHHHHO..........',
@@ -484,7 +473,6 @@
       '.OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO.'
     ];
 
-    // Guillotine (Black gi front headlock wrapping Red gi neck)
     const SPRITE_ANIM_GUILLOTINE = [
       '.......OOOOOOOOOOOOOO.......',
       '.....OOBBBBBBBBBBBBBBOO.....',
@@ -498,7 +486,6 @@
       '....OOOOOOOOOOOOOOOOOO......'
     ];
 
-    // Rear Naked Choke (Black gi behind Red gi with figure-four choke around neck)
     const SPRITE_ANIM_RNC = [
       '.......OOOOOOOOOOOOOO.......',
       '......OHHHHHHHHHHHHHHO......',
@@ -512,7 +499,6 @@
       '..OOOOOOOOOOOOOOOOOOOOOOOO..'
     ];
 
-    // Kimura / Americana (Figure-four shoulder lock isolating Red gi arm)
     const SPRITE_ANIM_SHOULDERLOCK = [
       '..........OOOOOOOO..........',
       '.........OHHHHHHHHO.........',
@@ -527,7 +513,6 @@
       '.......OOOOOOOOOOOOOOO......'
     ];
 
-    // Toe Hold (Figure-four ankle twist on Red gi leg)
     const SPRITE_ANIM_TOEHOLD = [
       '.......OOOOOO....OOOOOO.....',
       '......ORRRRRO....ORRRRRO....',
@@ -564,9 +549,6 @@
       }
     }
 
-    // =========================================================================
-    // BJJ POSITIONAL STATE MACHINE & EDUCATIONAL LOGIC
-    // =========================================================================
     const POSITIONS = {
       STANDING: {
         name: 'STANDING (NEUTRAL)',
@@ -641,6 +623,7 @@
 
     let state = {};
     let lastRenderSignature = '';
+    let isPausedForRules = true;
 
     function initGame() {
       state = {
@@ -658,7 +641,7 @@
         flashTimer: 0,
         shakeTimer: 0,
         animTime: 0,
-        activeAnim: null // { type, label, timer, maxTimer, isSub, onComplete }
+        activeAnim: null
       };
       lastRenderSignature = '';
       updateHUD();
@@ -689,7 +672,7 @@
     }
 
     function handleTransition(t) {
-      if (state.gameOver || state.activeAnim) return;
+      if (state.gameOver || state.activeAnim || isPausedForRules) return;
       state.attempts++;
 
       if (state.playerStamina < t.staminaCost) {
@@ -702,7 +685,6 @@
 
       state.playerStamina = Math.max(0, state.playerStamina - t.staminaCost);
 
-      // Clinch & Takedown Sequence
       if (t.id === 'clinch') {
         playActionAnimation('CLINCH', 'CLINCH & TAKEDOWN DRIVE!', 1.15, false, () => {
           const roll = Math.random();
@@ -727,7 +709,6 @@
         return;
       }
 
-      // Standard Positional Transition or Posture Break Sequence
       const successChance = 0.85 - (state.oppPosture * 0.002);
       const succeeded = Math.random() <= successChance;
 
@@ -754,7 +735,7 @@
     }
 
     function handleSubmission(sub) {
-      if (state.gameOver || state.activeAnim) return;
+      if (state.gameOver || state.activeAnim || isPausedForRules) return;
       state.attempts++;
 
       if (state.oppPosture > sub.minPosture) {
@@ -782,7 +763,7 @@
     }
 
     function handleCounter() {
-      if (!state.telegraph || state.gameOver || state.activeAnim) return;
+      if (!state.telegraph || state.gameOver || state.activeAnim || isPausedForRules) return;
       state.attempts++;
       state.successes++;
 
@@ -907,47 +888,59 @@
 
       const posData = POSITIONS[state.pos];
       const transDiv = document.getElementById('transitionControls');
-      transDiv.innerHTML = '';
+      let transHTML = '';
 
       if (state.telegraph && !busy) {
-        const cBtn = document.createElement('button');
-        cBtn.type = 'button';
-        cBtn.className = 'counter-btn';
-        cBtn.textContent = '⚡ COUNTER / REVERSE [SPACE]';
-        cBtn.onclick = handleCounter;
-        transDiv.appendChild(cBtn);
+        transHTML += `<button type="button" class="counter-btn" data-action="counter">⚡ COUNTER / REVERSE [SPACE]</button>`;
       }
 
-      posData.transitions.forEach(t => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = `${t.label} (-${t.staminaCost} Stam)`;
-        btn.disabled = state.gameOver || Boolean(state.telegraph) || busy;
-        btn.onclick = () => handleTransition(t);
-        transDiv.appendChild(btn);
+      posData.transitions.forEach((t, idx) => {
+        const disabledAttr = (state.gameOver || Boolean(state.telegraph) || busy) ? 'disabled' : '';
+        transHTML += `<button type="button" data-action="transition" data-idx="${idx}" ${disabledAttr}>${t.label} (-${t.staminaCost} Stam)</button>`;
       });
+      transDiv.innerHTML = transHTML;
 
       const subDiv = document.getElementById('submissionControls');
-      subDiv.innerHTML = '';
       if (posData.submissions.length === 0) {
         subDiv.innerHTML = '<span style="font-size:0.82rem;color:#8e7ea8;">No submissions available from Standing.</span>';
       } else {
-        posData.submissions.forEach(sub => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'sub-btn';
+        let subHTML = '';
+        posData.submissions.forEach((sub, idx) => {
           const ready = state.oppPosture <= sub.minPosture;
-          btn.textContent = ready ? `🔒 ${sub.label} (READY)` : `${sub.label} (Need <${sub.minPosture}% Posture)`;
-          btn.disabled = state.gameOver || !ready || Boolean(state.telegraph) || busy;
-          btn.onclick = () => handleSubmission(sub);
-          subDiv.appendChild(btn);
+          const disabledAttr = (state.gameOver || !ready || Boolean(state.telegraph) || busy) ? 'disabled' : '';
+          const labelText = ready ? `🔒 ${sub.label} (READY)` : `${sub.label} (Need &lt;${sub.minPosture}% Posture)`;
+          subHTML += `<button type="button" class="sub-btn" data-action="submission" data-idx="${idx}" ${disabledAttr}>${labelText}</button>`;
         });
+        subDiv.innerHTML = subHTML;
       }
     }
 
     // =========================================================================
-    // RETRO ARCADE ARENA & MULTI-STAGE ACTION ANIMATION RENDERER
+    // EVENT DELEGATION (GUARANTEES CLICKS ALWAYS FIRE)
     // =========================================================================
+    document.getElementById('transitionControls').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn || btn.disabled) return;
+      const action = btn.dataset.action;
+      if (action === 'counter') {
+        handleCounter();
+      } else if (action === 'transition') {
+        const idx = Number(btn.dataset.idx);
+        const t = POSITIONS[state.pos].transitions[idx];
+        if (t) handleTransition(t);
+      }
+    });
+
+    document.getElementById('submissionControls').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn || btn.disabled) return;
+      if (btn.dataset.action === 'submission') {
+        const idx = Number(btn.dataset.idx);
+        const sub = POSITIONS[state.pos].submissions[idx];
+        if (sub) handleSubmission(sub);
+      }
+    });
+
     function drawSpeedLines(color = 'rgba(0, 245, 212, 0.35)') {
       ctx.fillStyle = color;
       for (let i = 0; i < 12; i++) {
@@ -968,7 +961,6 @@
         ctx.translate(dx, dy);
       }
 
-      // 1. Dark Retro Arena Backdrop & Crowd Silhouettes
       ctx.fillStyle = '#0d0817';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -983,7 +975,6 @@
         ctx.fillRect(x, 96 + hOffset, 22, 36);
       }
 
-      // 2. Tatami Mat Perspective Floor
       ctx.fillStyle = '#2d1b4e';
       ctx.beginPath();
       ctx.moveTo(110, 128);
@@ -1000,15 +991,13 @@
       ctx.lineWidth = 4;
       ctx.strokeRect(185, 166, 430, 156);
 
-      // 3. Render Either Active Transition/Submission Animation OR Idle Positional Stance
       if (state.activeAnim) {
         const anim = state.activeAnim;
-        const progress = 1 - (anim.timer / anim.maxTimer); // 0 -> 1
+        const progress = 1 - (anim.timer / anim.maxTimer);
         const pulseStep = Math.floor(state.animTime * 16) % 2;
 
         drawSpeedLines(anim.isSub ? 'rgba(255, 209, 102, 0.35)' : 'rgba(0, 245, 212, 0.35)');
 
-        // Shadow under grappling pair
         ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
         ctx.fillRect(280, 278, 240, 16);
 
@@ -1020,22 +1009,22 @@
         switch (anim.type) {
           case 'CLINCH':
             actionSprite = SPRITE_ANIM_CLINCH;
-            offsetY = Math.round(progress * 38); // Driving takedown down to mat
+            offsetY = Math.round(progress * 38);
             offsetX = pulseStep === 0 ? -8 : 8;
             break;
           case 'PASS':
             actionSprite = SPRITE_ANIM_SCRAMBLE;
-            offsetX = Math.round(Math.sin(progress * Math.PI) * 75); // Lateral knee-cut slice
+            offsetX = Math.round(Math.sin(progress * Math.PI) * 75);
             offsetY = 12;
             break;
           case 'SWEEP':
             actionSprite = SPRITE_ANIM_SCRAMBLE;
-            offsetX = Math.round(Math.cos(progress * Math.PI) * 85); // Rolling sweep reversal
+            offsetX = Math.round(Math.cos(progress * Math.PI) * 85);
             offsetY = Math.round(-Math.sin(progress * Math.PI) * 28);
             break;
           case 'SHRIMP':
             actionSprite = SPRITE_ANIM_SCRAMBLE;
-            offsetX = Math.round(-Math.sin(progress * Math.PI) * 70); // Hip escape out
+            offsetX = Math.round(-Math.sin(progress * Math.PI) * 70);
             offsetY = 18;
             break;
           case 'BACK_TAKE':
@@ -1050,33 +1039,27 @@
           case 'ARMBAR':
             actionSprite = SPRITE_ANIM_ARMBAR;
             offsetY = 14 + (pulseStep * 4);
-            scale = 7;
             break;
           case 'GUILLOTINE':
             actionSprite = SPRITE_ANIM_GUILLOTINE;
             offsetY = 10 + (pulseStep * 4);
-            scale = 7;
             break;
           case 'RNC':
             actionSprite = SPRITE_ANIM_RNC;
             offsetY = 8 + (pulseStep * 4);
-            scale = 7;
             break;
           case 'SHOULDERLOCK':
             actionSprite = SPRITE_ANIM_SHOULDERLOCK;
             offsetY = 14 + (pulseStep * 4);
-            scale = 7;
             break;
           case 'TOEHOLD':
             actionSprite = SPRITE_ANIM_TOEHOLD;
             offsetY = 16 + (pulseStep * 4);
-            scale = 7;
             break;
         }
 
         drawPixelSprite(actionSprite, 400 + offsetX, 224 + offsetY, scale, false);
 
-        // Action Banner & Submission Crank Meter
         ctx.fillStyle = '#0b0812';
         ctx.fillRect(210, 88, 380, 32);
         ctx.strokeStyle = anim.isSub ? '#ffd166' : '#00f5d4';
@@ -1089,7 +1072,6 @@
         ctx.fillText(anim.label, 400, 109);
 
         if (anim.isSub) {
-          // Animated Submission Torque Bar
           ctx.fillStyle = '#140d22';
           ctx.fillRect(260, 126, 280, 14);
           ctx.fillStyle = pulseStep === 0 ? '#ff2a4b' : '#ffd166';
@@ -1098,7 +1080,6 @@
           ctx.strokeRect(260, 126, 280, 14);
         }
       } else {
-        // Idle Positional Sprites
         const idleBob = Math.round(Math.sin(state.animTime * 5) * 3);
         const isTelegraphing = Boolean(state.telegraph);
         const flashFrame = isTelegraphing && (Math.floor(state.animTime * 14) % 2 === 0);
@@ -1130,17 +1111,14 @@
 
         drawPixelSprite(oppSprite, 400, oppY, oppScale, flashFrame);
 
-        // Foreground Player Black Gi Silhouette
         const playerBob = Math.round(Math.cos(state.animTime * 4) * 2);
         drawPixelSprite(SPRITE_PLAYER_FOREGROUND, 400, 336 + playerBob, 7, false);
       }
 
-      // 4. Arcade HUD Bars
       drawBar(24, 18, 260, 22, state.playerStamina, 100, '#00f5d4', 'YOU (BLACK GI)');
       const postColor = state.oppPosture <= 45 ? '#f5b700' : '#ff3b5c';
       drawBar(516, 18, 260, 22, state.oppPosture, 100, postColor, 'OPP (RED GI)');
 
-      // Telegraph Reaction Timer Bar
       if (state.telegraph && !state.activeAnim) {
         const pct = Math.max(0, state.telegraph.timer / state.telegraph.maxTimer);
         ctx.fillStyle = '#140d22';
@@ -1157,7 +1135,6 @@
         ctx.fillText(`! ${state.telegraph.label} — HIT SPACE !`, 400, 58);
       }
 
-      // Action Result Flash Banner
       if (state.flashTimer > 0 && !state.activeAnim) {
         ctx.font = 'bold 20px "Courier New", monospace';
         ctx.textAlign = 'center';
@@ -1192,8 +1169,7 @@
 
       state.animTime += dt;
 
-      if (!state.gameOver) {
-        // Advance active transition/submission animation if running
+      if (!state.gameOver && !isPausedForRules) {
         if (state.activeAnim) {
           state.activeAnim.timer -= dt;
           if (state.activeAnim.timer <= 0) {
@@ -1251,8 +1227,14 @@
       }
     });
 
-    document.getElementById('rulesBtn').onclick = () => document.getElementById('rulesModal').classList.remove('hidden');
-    document.getElementById('closeRulesBtn').onclick = () => document.getElementById('rulesModal').classList.add('hidden');
+    document.getElementById('rulesBtn').onclick = () => {
+      isPausedForRules = true;
+      document.getElementById('rulesModal').classList.remove('hidden');
+    };
+    document.getElementById('closeRulesBtn').onclick = () => {
+      isPausedForRules = false;
+      document.getElementById('rulesModal').classList.add('hidden');
+    };
     document.getElementById('resetBtn').onclick = initGame;
     document.getElementById('playAgainBtn').onclick = () => {
       document.getElementById('endModal').classList.add('hidden');
